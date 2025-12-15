@@ -1,14 +1,17 @@
 // ====================================
-// MÓDULO DE AUTENTICACIÓN
+// MÓDULO DE AUTENTICACIÓN (CORREGIDO)
 // ====================================
 
-// ===== SELECCIÓN DE ROL =====
 // ===== SELECCIÓN DE ROL =====
 function seleccionarRol(rol) {
   localStorage.setItem('selectedRole', rol);
   
-  // Guardar el rol en variable global
-  if (typeof window.rolSeleccionado !== 'undefined') {
+  // CORRECCIÓN IMPORTANTE:
+  // Actualizamos la variable global 'rolSeleccionado' que está en index.html.
+  // Usamos try/catch para manejar si la variable fue declarada con let/var o en window.
+  try {
+    rolSeleccionado = rol;
+  } catch (e) {
     window.rolSeleccionado = rol;
   }
   
@@ -27,25 +30,23 @@ function seleccionarRol(rol) {
 // ===== REGISTRO DE ESTUDIANTE =====
 async function registrarEstudiante(email, password, nombre) {
   try {
-    // Crear usuario en Firebase Auth
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const user = userCredential.user;
     
-    // Crear documento en Firestore
     await db.collection('users').doc(user.uid).set({
       id: user.uid,
       name: nombre,
       email: email,
       role: 'student',
       wallet_balance: 0,
-      points: 150, // Puntos iniciales de bienvenida
+      points: 150,
       created_at: getTimestamp(),
       photo_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=random`
     });
     
     alert('¡Registro exitoso! Bienvenido a Sapiens');
     
-    // Mostrar marketplace
+    // UI Updates
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('role-screen').style.display = 'none';
     document.getElementById('marketplace-screen').style.display = 'block';
@@ -62,16 +63,13 @@ async function registrarEstudiante(email, password, nombre) {
 // ===== REGISTRO DE MENTOR =====
 async function registrarMentor(email, password, nombre, universidad, materias, precioHora) {
   try {
-    // Crear usuario en Firebase Auth
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const user = userCredential.user;
     
-    // Procesar materias (convertir string a array)
     const materiasArray = typeof materias === 'string' 
       ? materias.split(',').map(m => m.trim()) 
       : materias;
     
-    // Crear documento en Firestore
     await db.collection('users').doc(user.uid).set({
       id: user.uid,
       name: nombre,
@@ -81,10 +79,10 @@ async function registrarMentor(email, password, nombre, universidad, materias, p
       subjects: materiasArray,
       hourly_rate: parseFloat(precioHora),
       wallet_balance: 0,
-      rating: 5.0, // Rating inicial perfecto
+      rating: 5.0,
       reviews_count: 0,
       total_classes: 0,
-      status: 'verified', // Auto-verificado para la feria
+      status: 'verified',
       availability: generarDisponibilidadInicial(),
       created_at: getTimestamp(),
       photo_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=random`
@@ -92,13 +90,19 @@ async function registrarMentor(email, password, nombre, universidad, materias, p
     
     alert('¡Registro exitoso! Ya puedes empezar a recibir solicitudes');
     
-    // Mostrar panel mentor
+    // Mostrar panel mentor y cargar datos
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('role-screen').style.display = 'none';
     document.getElementById('mentor-validation-screen').style.display = 'none';
     document.getElementById('screen-mentor-dashboard').style.display = 'block';
+    
     if (document.getElementById('mentor-dash-name')) {
       document.getElementById('mentor-dash-name').innerText = nombre;
+    }
+
+    // Cargar datos del dashboard inmediatamente
+    if (typeof cargarDashboardMentor === 'function') {
+      cargarDashboardMentor(user.uid);
     }
     
   } catch (error) {
@@ -107,19 +111,16 @@ async function registrarMentor(email, password, nombre, universidad, materias, p
   }
 }
 
-// Generar disponibilidad inicial (todos los slots libres)
 function generarDisponibilidadInicial() {
   const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
   const horarios = ['09:00', '15:00'];
   const disponibilidad = {};
-  
   dias.forEach(dia => {
     disponibilidad[dia] = {};
     horarios.forEach(hora => {
-      disponibilidad[dia][hora] = true; // true = libre
+      disponibilidad[dia][hora] = true;
     });
   });
-  
   return disponibilidad;
 }
 
@@ -129,11 +130,9 @@ async function iniciarSesion(email, password) {
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
     
-    // Obtener datos del usuario
     const userDoc = await db.collection('users').doc(user.uid).get();
     const userData = userDoc.data();
     
-    // Ocultar pantallas de autenticación
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('role-screen').style.display = 'none';
     
@@ -144,11 +143,19 @@ async function iniciarSesion(email, password) {
       if (document.getElementById('mentor-dash-name')) {
         document.getElementById('mentor-dash-name').innerText = userData.name;
       }
+      // Cargar datos específicos del mentor
+      if (typeof cargarDashboardMentor === 'function') {
+        cargarDashboardMentor(user.uid);
+      }
     } else {
       document.getElementById('screen-mentor-dashboard').style.display = 'none';
       document.getElementById('marketplace-screen').style.display = 'block';
       if (document.getElementById('display-name')) {
         document.getElementById('display-name').innerText = userData.name;
+      }
+      // Cargar tutores para el estudiante
+      if (typeof mostrarTutoresDisponibles === 'function') {
+         mostrarTutoresDisponibles();
       }
     }
     
@@ -174,11 +181,8 @@ async function cerrarSesionFirebase() {
 function verificarAutenticacion() {
   return new Promise((resolve) => {
     auth.onAuthStateChanged((user) => {
-      if (user) {
-        resolve(user);
-      } else {
-        resolve(null);
-      }
+      if (user) resolve(user);
+      else resolve(null);
     });
   });
 }

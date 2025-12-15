@@ -856,259 +856,110 @@
 
     <div id="screen-mentor-dashboard" style="display: none;">
         <div class="mentor-container">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                <div>
-                    <h2 style="color: #2d3748; font-weight: 800; font-size: 26px; margin: 0;">Panel de Control</h2>
-                    <p style="color: #718096; margin: 5px 0 0 0; font-size: 14px;">Bienvenido de vuelta, <strong id="mentor-dash-name">Frank</strong> 👋</p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                    <div>
+                        <h2 style="color: #2d3748; font-weight: 800; font-size: 26px; margin: 0;">Panel de Control</h2>
+                        <p style="color: #718096; margin: 5px 0 0 0; font-size: 14px;">Bienvenido, <strong id="mentor-dash-name">...</strong> 👋</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <button onclick="cerrarSesionFirebase()" style="background: #FFEBEE; color: #D32F2F; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                            Salir ⏻
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px 5px 5px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                            <img id="mentor-profile-pic" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee;">
+                            <span style="font-size: 13px; font-weight: 600; color: #2d3748;">En línea</span>
+                            <div style="width: 10px; height: 10px; background: #27AE60; border-radius: 50%;"></div>
+                        </div>
+                    </div>
                 </div>
 
-
-                <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="stats-row">
+                    <div class="sapiens-card card-earnings">
+                        <div class="stat-title"><span>💰 Tu Billetera</span></div>
+                        <div class="stat-number" id="wallet-balance">$0.00</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="stat-sub" style="color: #A0AEC0;">Saldo disponible</span>
+                        </div>
+                    </div>
                     
-                    <button onclick="cerrarSesion()" style="background: #FFEBEE; color: #D32F2F; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        Salir ⏻
-                    </button>
-
-                    <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px 5px 5px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" 
-                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                        <span style="font-size: 13px; font-weight: 600; color: #2d3748;">En línea</span>
-                        <div style="width: 10px; height: 10px; background: #27AE60; border-radius: 50%;"></div>
+                    <div class="sapiens-card card-rating">
+                        <div class="stat-title"><span>⭐ Reputación</span></div>
+                        <div class="stat-number" id="mentor-rating">5.0</div>
+                        <div class="stat-sub" style="color: #718096;" id="reviews-count-text">Nuevo Mentor</div>
                     </div>
 
-                </div>
-
-            </div>
-
-            <div class="stats-row">
-                <div class="sapiens-card card-earnings">
-                    <div class="stat-title">
-                        <span>💰 Tu Billetera</span>
-                    </div>
-                    <div class="stat-number">$120.00</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="trend-up">↗ 15%</span>
-                        <span class="stat-sub" style="color: #A0AEC0;">vs mes pasado</span>
+                    <div class="sapiens-card card-next" id="next-class-card" style="display: none;">
+                        </div>
+                    
+                    <div class="sapiens-card" id="empty-state-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 2px dashed #cbd5e0;">
+                        <div style="font-size: 30px; margin-bottom: 10px;">😴</div>
+                        <h4 style="margin: 0; color: #4a5568;">Sin clases próximas</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #718096;">Tu agenda está libre por ahora.</p>
                     </div>
                 </div>
                 
-                <div class="sapiens-card card-rating">
-                    <div class="stat-title">
-                        <span>⭐ Reputación</span>
-                    </div>
-                    <div class="stat-number">4.9</div>
-                    <div class="stat-sub" style="color: #718096;">"Tutor Oro" - 32 reseñas</div>
-                </div>
-
-                <div class="sapiens-card card-next">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div>
-                            <div class="stat-title" style="color: var(--primary);">🔴 En 15 minutos</div>
-                            <h3 style="margin: 10px 0 5px 0; font-size: 18px; color: #2d3748;">Cálculo 1: Derivadas</h3>
-                            <p style="margin: 0; font-size: 14px; color: #718096;">Alumno: <strong>Keba</strong></p>
+                <div id="mentor-meeting-embedded" style="display: none; height: 80vh; background: #1a1a1a; border-radius: 20px; overflow: hidden; flex-direction: column; margin-top: 20px;">
+                    <div style="padding: 15px 20px; background: #222; color: white; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="background: #E53E3E; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">EN VIVO</span>
+                            <span>Tutoría en Curso</span>
                         </div>
-                        <div style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); font-size: 24px;">📹</div>
-                    </div>
-                    
-                    <button onclick="iniciarSalaMentor()" class="btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 4px 15px rgba(79, 189, 186, 0.3);">
-                        Iniciar Sala ahora
-                    </button>
-                </div>
-            </div>
-
-            <div id="mentor-meeting-embedded" style="display: none; height: 80vh; background: #1a1a1a; border-radius: 20px; overflow: hidden; flex-direction: column; margin-top: 20px;">
-                <div style="padding: 15px 20px; background: #222; color: white; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <span style="background: #E53E3E; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">EN VIVO</span>
-                        <span>Tutoría con Keba</span>
-                    </div>
-                    <button onclick="salirDeLaSala()" style="background: #E53E3E; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                        Finalizar y Cobrar 📞
-                    </button>
-                </div>
-
-                <div style="flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: black;">
-                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
-                    <div style="position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">Tú (Mentor)</div>
-                    <div style="position: absolute; bottom: 20px; right: 20px; width: 200px; height: 150px; background: #333; border-radius: 10px; overflow: hidden; border: 2px solid #555; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                </div>
-
-                <div style="padding: 20px; background: #222; display: flex; justify-content: center; gap: 20px;">
-                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">🎤</button>
-                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">📹</button>
-                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">🖥️</button>
-                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">💬</button>
-                </div>
-            </div>
-            
-            <div id="mentor-post-meeting-embedded" style="display: none; min-height: 70vh; background: white; border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); margin: 20px auto; max-width: 600px;">
-                <div style="text-align: center; max-width: 500px;">
-                    <div style="background: #E8F5E9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-                        <span style="font-size: 40px;">💰</span>
-                    </div>
-                    
-                    <h2 style="color: #2D3748; margin: 0 0 10px 0;">¡Sesión Finalizada!</h2>
-                    <p style="color: #718096; margin-bottom: 30px; font-size: 14px;">El pago por las horas impartidas se ha acreditado a tu billetera.</p>
-                    
-                    <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 30px;">
-                    
-                    <div style="text-align: left; background: #F7FAFC; padding: 25px; border-radius: 15px; border: 1px solid #EDF2F7;">
-                        <h4 style="margin: 0 0 5px 0; color: #2D3748; font-size: 16px;">Genera Ingresos Pasivos 📈</h4>
-                        <p style="font-size: 12px; color: #718096; margin-bottom: 20px;">Sube los apuntes de esta clase para venderlos.</p>
-                        
-                        <div style="border: 2px dashed #CBD5E0; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: white; transition: 0.2s; margin-bottom: 20px;" onclick="alert('PDF cargado: Apuntes_Clase.pdf')">
-                            <div style="font-size: 24px; margin-bottom: 5px;">☁️</div>
-                            <div style="font-weight: bold; font-size: 13px; color: #4A5568;">Clic para subir PDF</div>
-                        </div>
-                        
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <label style="font-weight: bold; font-size: 13px; color: #2D3748;">Precio de venta:</label>
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <span style="color: #718096;">$</span>
-                                <input type="number" value="2.50" style="width: 80px; padding: 8px; border: 1px solid #CBD5E0; border-radius: 8px; font-weight: bold; text-align: center; margin: 0;">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button class="btn-primary" style="width: 100%; justify-content: center; margin-top: 30px; padding: 15px;" onclick="finalizarMentorFlow()">
-                        Publicar Material y Volver al Panel
-                    </button>
-                    
-                    <div style="margin-top: 15px;">
-                        <span style="font-size: 12px; color: #999; cursor: pointer; text-decoration: underline;" onclick="finalizarMentorFlow()">Omitir y volver al inicio</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sapiens-card" style="margin-bottom: 40px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0; font-size: 18px; color: var(--dark);">📅 Mi Disponibilidad Semanal</h3>
-                    <span style="font-size: 12px; color: #666;">Configura tus bloques libres</span>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; text-align: center;">
-                    
-                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">LUN</div>
-                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">MAR</div>
-                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">MIE</div>
-                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">JUE</div>
-                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">VIE</div>
-
-                    <div class="time-slot busy">09:00</div>
-                    <div class="time-slot available">09:00</div>
-                    <div class="time-slot busy">09:00</div>
-                    <div class="time-slot available">09:00</div>
-                    <div class="time-slot available">09:00</div>
-
-                    <div class="time-slot available">15:00</div>
-                    <div class="time-slot available">15:00</div>
-                    <div class="time-slot busy">15:00</div>
-                    <div class="time-slot available">15:00</div>
-                    <div class="time-slot busy">15:00</div>
-                </div>
-                
-                <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 12px; color: #666;">
-                    <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 10px; height: 10px; background: #E0F2F1; border: 1px solid var(--primary); border-radius: 2px;"></div> Libre</div>
-                    <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 10px; height: 10px; background: #eee; border-radius: 2px;"></div> Ocupado</div>
-                </div>
-            </div>
-
-            <div class="dashboard-lower-grid">
-                
-                <div>
-                    <h3 style="font-size: 18px; color: #2d3748; margin-bottom: 25px;">Solicitudes Pendientes <span style="background: #E53E3E; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;">3</span></h3>
-                    
-                    <div id="request-list">
-                        <div class="req-card" id="req-1">
-                            <div class="req-left">
-                                <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80" class="req-img">
-                                <div class="req-details">
-                                    <h4>Lina (Sistemas)</h4>
-                                    <div style="display:flex; gap: 8px; margin-bottom: 4px;">
-                                        <span class="req-tag">Python</span>
-                                        <span class="req-tag">Pandas</span>
-                                    </div>
-                                    <div style="font-size: 12px; color: #718096;">📅 Hoy, 4:00 PM • 2 horas</div>
-                                </div>
-                            </div>
-                            <div class="req-buttons">
-                                <button class="btn-icon btn-no" onclick="ocultarSolicitud('req-1')">✕</button>
-                                <button class="btn-icon btn-yes" onclick="aceptarSolicitudAnimada('req-1')">✓</button>
-                            </div>
-                        </div>
-
-                        <div class="req-card" id="req-2">
-                            <div class="req-left">
-                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" class="req-img">
-                                <div class="req-details">
-                                    <h4>Juan (Mecatrónica)</h4>
-                                    <div style="display:flex; gap: 8px; margin-bottom: 4px;">
-                                        <span class="req-tag">Física</span>
-                                        <span class="req-tag">Vectores</span>
-                                    </div>
-                                    <div style="font-size: 12px; color: #718096;">📅 Mañana, 10:00 AM • 1 hora</div>
-                                </div>
-                            </div>
-                            <div class="req-buttons">
-                                <button class="btn-icon btn-no" onclick="ocultarSolicitud('req-2')">✕</button>
-                                <button class="btn-icon btn-yes" onclick="aceptarSolicitudAnimada('req-2')">✓</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sapiens-card" style="margin-top: 20px; border: 2px solid #F2C94C; padding: 20px;">
-                    <h4 style="margin-top: 0; font-size: 14px; color: #D97706;">⚡ Acción Requerida</h4>
-                    <p style="font-size: 12px; color: #666;">Define tu tarifa por hora para aparecer en búsquedas.</p>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="number" id="mentor-rate" placeholder="$ 0.00" style="padding: 8px; width: 80px; margin: 0;">
-                        <button class="btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="validarTarifa()">Guardar</button>
-                    </div>
-                </div>
-
-
-                <div>
-                    <div class="sapiens-card" style="padding: 25px; min-height: 400px;">
-                        <h3 style="font-size: 18px; color: #2d3748; margin-top: 0; margin-bottom: 20px;">Mis Guías en Venta</h3>
-                        
-                        <div class="tool-item">
-                            <div class="tool-icon pdf-icon">PDF</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 700; font-size: 14px; color: #333;">Guía Python Básico</div>
-                                <div style="font-size: 12px; color: #A0AEC0;">35 ventas</div>
-                            </div>
-                            <div style="font-weight: 700; color: #27AE60;">+$87.50</div>
-                        </div>
-
-                        <div class="tool-item">
-                            <div class="tool-icon sim-icon">SIM</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 700; font-size: 14px; color: #333;">Simulador Cálculo</div>
-                                <div style="font-size: 12px; color: #A0AEC0;">12 ventas</div>
-                            </div>
-                            <div style="font-weight: 700; color: #27AE60;">+$48.00</div>
-                        </div>
-
-                        <div class="tool-item" style="border: none;">
-                            <div class="tool-icon pdf-icon">PDF</div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 700; font-size: 14px; color: #333;">Formulario Física 1</div>
-                                <div style="font-size: 12px; color: #A0AEC0;">8 ventas</div>
-                            </div>
-                            <div style="font-weight: 700; color: #27AE60;">+$20.00</div>
-                        </div>
-
-                        <button class="btn-upload" onclick="alert('Subir archivo...')">
-                            + Subir Nuevo Material
+                        <button onclick="salirDeLaSala()" style="background: #E53E3E; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                            Finalizar y Cobrar 📞
                         </button>
                     </div>
+                    <div style="flex: 1; display: flex; justify-content: center; align-items: center; background: black; color: #666;">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.3;">
+                    </div>
+                </div>
+                
+                <div id="mentor-post-meeting-embedded" style="display: none; min-height: 70vh; background: white; border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); margin: 20px auto; max-width: 600px;">
+                    <h2 style="color: #2D3748;">¡Sesión Finalizada!</h2>
+                    <p style="color: #718096; margin-bottom: 20px;">El pago se ha acreditado a tu billetera.</p>
+                    <button class="btn-primary" onclick="finalizarMentorFlow()">Volver al Panel</button>
                 </div>
 
+                <div class="sapiens-card" style="margin-bottom: 40px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; font-size: 18px; color: var(--dark);">📅 Mi Disponibilidad Semanal</h3>
+                        <span style="font-size: 12px; color: #666;">Tu horario actual</span>
+                    </div>
+                    <div id="calendar-grid" style="display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 10px; align-items: center;">
+                        </div>
+                </div>
+
+                <div class="dashboard-lower-grid">
+                    <div>
+                        <h3 style="font-size: 18px; color: #2d3748; margin-bottom: 25px;">
+                            Solicitudes Pendientes 
+                            <span id="pending-badge" style="background: #E53E3E; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px; display: none;">0</span>
+                        </h3>
+                        
+                        <div id="solicitudes-container">
+                            </div>
+
+                        <div class="sapiens-card" style="margin-top: 20px; border: 2px solid #F2C94C; padding: 20px; background: #FFFDF5;">
+                            <h4 style="margin-top: 0; font-size: 14px; color: #D97706;">⚡ Acción Requerida</h4>
+                            <p style="font-size: 12px; color: #666;">Define tu tarifa por hora para aparecer en búsquedas.</p>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="mentor-rate" placeholder="$ 0.00" style="padding: 8px; width: 80px; margin: 0; border: 1px solid #ddd; border-radius: 8px;">
+                                <button class="btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="validarTarifa()">Guardar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="sapiens-card" style="padding: 25px;">
+                            <h3 style="font-size: 18px; color: #2d3748; margin-top: 0; margin-bottom: 20px;">Mis Recursos</h3>
+                            <div style="text-align: center; padding: 20px 0;">
+                                <p style="font-size: 13px; color: #666;">Sube guías o exámenes resueltos para ganar dinero pasivo.</p>
+                                <button class="btn-upload" onclick="alert('Función próximamente...')">+ Subir Material</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
     </div>
 
 

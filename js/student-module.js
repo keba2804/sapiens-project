@@ -1,15 +1,17 @@
 // ====================================
-// MÓDULO DEL ESTUDIANTE
+// MÓDULO DEL ESTUDIANTE (VERSIÓN COMPLETA FERIA)
 // ====================================
 
-// ===== CARGAR TUTORES DISPONIBLES =====
+// variable global para el listener
+let unsubscribeMisClases = null;
+
+// ===== 1. CARGAR TUTORES REALES DE FIREBASE =====
 async function cargarTutores(filtroMateria = null) {
   try {
     let query = db.collection('users')
-      .where('role', '==', 'mentor')
-      .where('status', '==', 'verified');
+      .where('role', '==', 'mentor');
     
-    // Aplicar filtro de materia si existe
+    // Filtro opcional por materia
     if (filtroMateria && filtroMateria.trim() !== '') {
       query = query.where('subjects', 'array-contains', filtroMateria);
     }
@@ -24,8 +26,8 @@ async function cargarTutores(filtroMateria = null) {
       });
     });
     
-    // Ordenar por rating
-    tutores.sort((a, b) => b.rating - a.rating);
+    // Ordenar por rating (los mejores primero)
+    tutores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     
     console.log(`Tutores cargados: ${tutores.length}`);
     return tutores;
@@ -36,129 +38,107 @@ async function cargarTutores(filtroMateria = null) {
   }
 }
 
-// ===== BUSCAR TUTORES =====
-async function buscarTutores(materia) {
-  const tutores = await cargarTutores(materia);
-  mostrarTutoresEnUI(tutores);
-}
-
-// ===== MOSTRAR TUTORES EN LA UI =====
-function mostrarTutoresEnUI(tutores) {
-  const container = document.getElementById('tutors-list');
-  if (!container) {
-    console.log("Contenedor 'tutors-list' no encontrado");
-    return;
+// ===== 2. ESCUCHAR MIS CLASES (CORE DEL MATCH EN FERIA) =====
+function escucharMisClasesEstudiante(studentId) {
+  // Evitar duplicar listeners
+  if (unsubscribeMisClases) {
+      unsubscribeMisClases();
   }
-  
-  container.innerHTML = '';
-  
-  if (tutores.length === 0) {
-    container.innerHTML = '<p style="text-align:center; color:#999;">No se encontraron tutores</p>';
-    return;
-  }
-  
-  tutores.forEach(tutor => {
-    const card = crearTarjetaTutor(tutor);
-    container.appendChild(card);
-  });
+
+  // Escucha cambios en tiempo real
+  unsubscribeMisClases = db.collection('sessions')
+    .where('student_id', '==', studentId)
+    .orderBy('created_at', 'desc')
+    .onSnapshot((snapshot) => {
+      const contenedor = document.getElementById('mis-clases-container');
+      if (!contenedor) return;
+      
+      contenedor.innerHTML = ''; // Limpiar
+
+      if (snapshot.empty) {
+        contenedor.innerHTML = '<p style="color:#999; text-align:center; font-style:italic;">No tienes solicitudes activas. ¡Reserva una clase!</p>';
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const clase = doc.data();
+        const claseId = doc.id;
+        
+        // Configuración visual de estados
+        const estados = {
+            'pending':   { color: '#F6E05E', texto: '⏳ Pendiente', borde: '#F6E05E' },
+            'accepted':  { color: '#48BB78', texto: '✅ ¡Aceptada!', borde: '#48BB78' },
+            'rejected':  { color: '#F56565', texto: '❌ Rechazada', borde: '#F56565' },
+            'completed': { color: '#4299E1', texto: '🎓 Finalizada', borde: '#4299E1' }
+        };
+
+        const estado = estados[clase.status] || { color: '#ccc', texto: clase.status, borde: '#ccc' };
+
+        // Crear tarjeta de solicitud
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background: white;
+            border-left: 5px solid ${estado.borde};
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        `;
+
+        // Botón de acción según estado
+        let botonAccion = '';
+        if (clase.status === 'accepted') {
+            botonAccion = `<button onclick="entrarSalaEstudiante('${claseId}')" style="display:block; margin-top:5px; font-size:12px; color:white; background:#48BB78; border:none; padding:5px 10px; border-radius:15px; cursor:pointer; font-weight:bold;">📹 Entrar a Sala</button>`;
+        } else if (clase.status === 'completed' && !clase.rated) {
+            botonAccion = `<button onclick="abrirModalCalificacion('${claseId}', '${clase.mentor_id}', '${clase.mentor_name}')" style="display:block; margin-top:5px; font-size:12px; color:white; background:#F6AD55; border:none; padding:5px 10px; border-radius:15px; cursor:pointer;">⭐ Calificar</button>`;
+        }
+
+        card.innerHTML = `
+            <div>
+                <h4 style="margin:0; color:#333; font-size:15px;">${clase.mentor_name}</h4>
+                <p style="margin:4px 0 0; font-size:13px; color:#666;">📚 ${clase.subject}</p>
+                <p style="margin:2px 0 0; font-size:12px; color:#999;">📅 ${clase.date} • ⏰ ${clase.time}</p>
+            </div>
+            <div style="text-align:right;">
+                <span style="background: ${estado.color}20; color: ${estado.color}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid ${estado.color}40;">
+                    ${estado.texto}
+                </span>
+                <div style="margin-top:5px;">${botonAccion}</div>
+            </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    });
 }
 
-// ===== CREAR TARJETA DE TUTOR =====
-function crearTarjetaTutor(tutor) {
-  const div = document.createElement('div');
-  div.className = 'tutor-card';
-  div.style.cssText = `
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.3s;
-  `;
-  
-  div.onmouseover = () => div.style.transform = 'scale(1.02)';
-  div.onmouseout = () => div.style.transform = 'scale(1)';
-  div.onclick = () => verPerfilTutor(tutor.id);
-  
-  const estrellas = '⭐'.repeat(Math.floor(tutor.rating));
-  const materias = tutor.subjects.slice(0, 3).map(s => 
-    `<span style="background:#E8F5E9; padding:4px 8px; border-radius:12px; font-size:11px; margin-right:4px;">${s}</span>`
-  ).join('');
-  
-  div.innerHTML = `
-    <div style="text-align:center;">
-      <img src="${tutor.photo_url}" alt="${tutor.name}" 
-           style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
-      <h3 style="margin: 10px 0 5px 0;">${tutor.name}</h3>
-      <p style="color: #666; font-size: 13px; margin: 0;">${tutor.university}</p>
-      <div style="margin: 8px 0;">
-        ${estrellas} <span style="color:#666; font-size:13px;">${tutor.rating.toFixed(1)}</span>
-      </div>
-      <p style="font-size: 18px; font-weight: bold; color: #4FBDBA; margin: 8px 0;">
-        ${formatPrice(tutor.hourly_rate)}/hora
-      </p>
-      <div style="margin-top: 8px;">
-        ${materias}
-      </div>
-    </div>
-  `;
-  
-  return div;
-}
-
-// ===== VER PERFIL COMPLETO DEL TUTOR =====
-async function verPerfilTutor(tutorId) {
+// ===== 3. RESERVAR TUTORÍA (CONECTADO A FIREBASE) =====
+async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 1) {
   try {
-    const tutorDoc = await db.collection('users').doc(tutorId).get();
-    const tutor = tutorDoc.data();
-    
-    // Cargar reseñas
-    const reviewsSnapshot = await db.collection('reviews')
-      .where('mentor_id', '==', tutorId)
-      .orderBy('created_at', 'desc')
-      .limit(5)
-      .get();
-    
-    const reviews = [];
-    reviewsSnapshot.forEach(doc => reviews.push(doc.data()));
-    
-    // Mostrar en modal o alert (simplificado para demo)
-    alert(`
-📚 ${tutor.name}
-🏫 ${tutor.university}
-⭐ ${tutor.rating.toFixed(1)} (${tutor.reviews_count} reseñas)
-💰 ${formatPrice(tutor.hourly_rate)}/hora
-📖 Materias: ${tutor.subjects.join(', ')}
-    `);
-    
-  } catch (error) {
-    console.error("Error cargando perfil:", error);
-  }
-}
-
-// ===== RESERVAR TUTORÍA =====
-async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 2) {
-  try {
-    if (!currentUser) {
+    if (!auth.currentUser) {
       alert('Debes iniciar sesión primero');
       return;
     }
-    
-    // Obtener datos del tutor
+
+    // Feedback inmediato
+    const btnReserva = event?.target; 
+    if(btnReserva) { btnReserva.innerText = "Enviando..."; btnReserva.disabled = true; }
+
+    // 1. Obtener datos reales
     const tutorDoc = await db.collection('users').doc(tutorId).get();
+    const studentDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+    
+    if (!tutorDoc.exists) throw new Error("El mentor no existe");
+    
     const tutor = tutorDoc.data();
-    
-    // Obtener datos del estudiante
-    const studentDoc = await db.collection('users').doc(currentUser.uid).get();
     const student = studentDoc.data();
-    
-    // Calcular precios
-    const pricing = calculateTotalPrice(tutor.hourly_rate, duracion);
-    
-    // Crear sesión en Firestore
-    const sessionRef = await db.collection('sessions').add({
-      student_id: currentUser.uid,
+
+    // 2. Crear la sesión
+    await db.collection('sessions').add({
+      student_id: auth.currentUser.uid,
       mentor_id: tutorId,
       student_name: student.name,
       mentor_name: tutor.name,
@@ -166,68 +146,95 @@ async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 2) {
       date: fecha,
       time: hora,
       duration: duracion,
-      status: 'pending',
-      price: pricing.total,
-      breakdown: pricing,
-      created_at: getTimestamp(),
-      updated_at: getTimestamp()
+      status: 'pending', // Estado inicial
+      rated: false,
+      price: (tutor.hourly_rate || 5) * duracion,
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
+
+    alert(`✅ ¡Solicitud enviada a ${tutor.name}!\n\nRevisa la sección "Mis Clases" para ver cuando te acepte.`);
     
-    alert('¡Solicitud enviada! El mentor la revisará pronto.');
-    return sessionRef.id;
+    // Restaurar botón (aunque la lista se actualiza sola)
+    if(btnReserva) { btnReserva.innerText = "Reservado"; }
     
   } catch (error) {
-    console.error("Error reservando tutoría:", error);
+    console.error("Error reservando:", error);
     alert('Error al reservar: ' + error.message);
+    if(btnReserva) { btnReserva.innerText = "Reintentar"; btnReserva.disabled = false; }
   }
 }
 
-// ===== CALIFICAR MENTOR =====
-async function calificarMentor(sessionId, mentorId, rating, comentario) {
+// ===== 4. FUNCIONES RECUPERADAS (PERFIL Y CALIFICACIÓN) =====
+
+// Ver Perfil Completo (Recuperada)
+async function verPerfilTutor(tutorId) {
   try {
-    // Obtener datos del estudiante
-    const studentDoc = await db.collection('users').doc(currentUser.uid).get();
-    const student = studentDoc.data();
+    const tutorDoc = await db.collection('users').doc(tutorId).get();
+    const tutor = tutorDoc.data();
     
-    // Crear reseña
+    alert(`
+    👤 PERFIL DE MENTOR
+    -------------------
+    Nombre: ${tutor.name}
+    Universidad: ${tutor.university}
+    ⭐ Rating: ${tutor.rating ? tutor.rating.toFixed(1) : '5.0'}
+    💰 Tarifa: $${tutor.hourly_rate}/h
+    
+    📚 Materias: ${tutor.subjects.join(', ')}
+    `);
+  } catch (error) {
+    console.error("Error viendo perfil:", error);
+  }
+}
+
+// Calificar Mentor (Recuperada y Mejorada)
+async function calificarMentor(sessionId, mentorId, rating) {
+  try {
+    // 1. Guardar reseña
     await db.collection('reviews').add({
       session_id: sessionId,
       mentor_id: mentorId,
-      student_id: currentUser.uid,
-      student_name: student.name,
       rating: rating,
-      comment: comentario,
-      created_at: getTimestamp()
+      student_id: auth.currentUser.uid,
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
-    
-    // Recalcular rating del mentor
-    const reviewsSnapshot = await db.collection('reviews')
-      .where('mentor_id', '==', mentorId)
-      .get();
-    
-    let totalRating = 0;
-    let count = 0;
-    reviewsSnapshot.forEach(doc => {
-      totalRating += doc.data().rating;
-      count++;
-    });
-    
-    const newAvgRating = totalRating / count;
-    
-    // Actualizar mentor
-    await db.collection('users').doc(mentorId).update({
-      rating: newAvgRating,
-      reviews_count: count
-    });
-    
-    // Marcar sesión como calificada
+
+    // 2. Marcar sesión como calificada
     await db.collection('sessions').doc(sessionId).update({
       rated: true
     });
-    
-    alert('¡Gracias por tu calificación!');
-    
+
+    // 3. Recalcular promedio del mentor (Lógica simplificada para frontend)
+    // Nota: En una app real esto se hace con Cloud Functions, pero aquí hacemos un "truco" rápido
+    const reviewsSnap = await db.collection('reviews').where('mentor_id', '==', mentorId).get();
+    let suma = 0;
+    reviewsSnap.forEach(r => suma += r.data().rating);
+    const nuevoPromedio = suma / reviewsSnap.size;
+
+    await db.collection('users').doc(mentorId).update({
+      rating: nuevoPromedio,
+      reviews_count: reviewsSnap.size
+    });
+
+    alert("¡Gracias por tu calificación! ⭐");
+
   } catch (error) {
     console.error("Error calificando:", error);
+    alert("Error al guardar calificación");
   }
+}
+
+// ===== 5. UTILIDADES DE UI =====
+
+function entrarSalaEstudiante(sessionId) {
+    // Aquí podrías redirigir a una sala real o mostrar el modal simulado
+    document.getElementById('meeting-screen').style.display = 'block';
+    document.getElementById('marketplace-screen').style.display = 'none';
+}
+
+function abrirModalCalificacion(sessionId, mentorId, mentorName) {
+    const rating = prompt(`Califica tu clase con ${mentorName} (1-5):`);
+    if (rating && rating >= 1 && rating <= 5) {
+        calificarMentor(sessionId, mentorId, parseInt(rating));
+    }
 }
