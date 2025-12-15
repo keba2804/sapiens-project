@@ -35,6 +35,7 @@ async function cargarDashboardMentor(mentorId) {
         }
 
         // 3. CARGAR EL CALENDARIO
+        mostrarTarifaMentor(mentor.hourly_rate);
         inicializarCalendarioMentor(mentor.availability);
 
         // 4. ⚡ ACTIVAR ESCUCHAS EN TIEMPO REAL ⚡
@@ -43,6 +44,7 @@ async function cargarDashboardMentor(mentorId) {
         escucharSolicitudesPendientes(mentorId);
         escucharClasesAceptadas(mentorId);
         verificarTarifaConfigrada(mentorId);
+
         
         // 5. ⚡ MOSTRAR NOTIFICACIÓN DE BIENVENIDA
         setTimeout(() => {
@@ -618,4 +620,20 @@ function reproducirSonidoNotificacion() {
   } catch (error) {
     console.log('Audio no disponible');
   }
+}
+
+// ===== MOSTRAR TARIFA EN DASHBOARD =====
+function mostrarTarifaMentor(tarifa) {
+    // Buscar si existe algún elemento que muestre la tarifa en el dashboard
+    const tarifaCard = document.getElementById('tarifa-action-card');
+    
+    if (tarifaCard && tarifa && tarifa > 0) {
+        // Si tiene tarifa configurada, ocultar el card de "Acción Requerida"
+        tarifaCard.style.display = 'none';
+        console.log("✅ Tarifa configurada: $" + tarifa);
+    } else if (tarifaCard) {
+        // Si no tiene tarifa, mostrar el card
+        tarifaCard.style.display = 'block';
+        console.log("⚠️ Tarifa no configurada");
+    }
 }

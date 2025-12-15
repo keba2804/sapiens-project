@@ -814,6 +814,15 @@
                 Enviar y Acceder al Panel
             </button>
         </div>
+        <div style="margin-bottom: 30px; background: #FFF8E1; padding: 20px; border-radius: 12px; border: 2px solid #F2C94C;">
+            <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #D97706;">💰 Tu Tarifa por Hora (Requerido)</label>
+            <p style="font-size: 12px; color: #666; margin: 0 0 15px 0;">Define cuánto cobrarás por hora de tutoría.</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px; color: #D97706;">$</span>
+                <input type="number" id="mentor-rate-input" placeholder="5.00" min="1" max="50" step="0.50" style="width: 100px; padding: 12px; border: 2px solid #F2C94C; border-radius: 10px; font-size: 16px; font-weight: bold; box-sizing: border-box;">
+                <span style="font-size: 14px; color: #666;">por hora</span>
+            </div>
+        </div>
     </div>
 
     <div id="validation-timer" style="position: fixed; top: 0; left: 0; width: 100%; background: #2D3748; color: white; text-align: center; font-size: 12px; padding: 5px; z-index: 9999; display: none;">
@@ -2381,7 +2390,20 @@
             const password = localStorage.getItem('tempPassword');
             const universidad = document.getElementById('mentor-university')?.value || 'ESPOL';
             const materias = document.getElementById('mentor-subjects')?.value || 'Cálculo';
-            const precioHora = document.getElementById('mentor-rate')?.value || 5;
+            const precioHora = parseFloat(document.getElementById('mentor-rate-input')?.value);
+            
+            // ⚡ VALIDACIÓN DE TARIFA
+            if (!precioHora || precioHora <= 0) {
+                alert("⚠️ Debes definir tu tarifa por hora para continuar.");
+                document.getElementById('mentor-rate-input').focus();
+                return;
+            }
+            
+            if (precioHora < 1 || precioHora > 50) {
+                alert("⚠️ La tarifa debe estar entre $1 y $50 por hora.");
+                document.getElementById('mentor-rate-input').focus();
+                return;
+            }
             
             try {
                 await registrarMentor(email, password, nombre, universidad, materias, precioHora);
