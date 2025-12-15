@@ -18,16 +18,27 @@ async function cargarInterfazEstudiante(user) {
     if (!document.getElementById('mis-clases-section')) {
         const divClases = document.createElement('div');
         divClases.id = 'mis-clases-section';
-        divClases.style.cssText = `margin-bottom: 40px; background: #EBF8FF; padding: 30px; border-radius: 20px; border: 1px solid #BEE3F8;`;
+        divClases.style.cssText = `
+            margin-bottom: 40px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        `;
         divClases.innerHTML = `
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-                <span style="font-size:28px;">📅</span>
+                <span style="font-size:32px;">📅</span>
                 <div>
-                    <h3 style="margin:0; color:#2A4365; font-size: 20px;">Mis Solicitudes</h3>
-                    <p style="margin:0; font-size:13px; color:#718096;">Estado de tus reservas</p>
+                    <h3 style="margin:0; color:white; font-size: 22px; font-weight:800;">Mis Solicitudes</h3>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.8);">Actualización en tiempo real</p>
                 </div>
             </div>
-            <div id="mis-clases-container"><p style="color:#718096; padding:10px;">No tienes solicitudes activas</p></div>
+            <div id="mis-clases-container" style="background:white; padding:20px; border-radius:16px; min-height:100px;">
+                <p style="color:#718096; padding:10px; text-align:center;">
+                    <span style="font-size:24px; display:block; margin-bottom:10px;">⏳</span>
+                    Cargando tus solicitudes...
+                </p>
+            </div>
         `;
         const header = marketplace.querySelector('.header');
         if(header && header.nextSibling) header.parentNode.insertBefore(divClases, header.nextSibling);

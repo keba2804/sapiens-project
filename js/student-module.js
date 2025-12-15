@@ -39,13 +39,16 @@ async function cargarTutores(filtroMateria = null) {
 }
 
 // ===== 2. ESCUCHAR MIS CLASES (CORE DEL MATCH EN FERIA) =====
+// ===== 2. ESCUCHAR MIS CLASES (CON TIEMPO REAL MEJORADO) =====
 function escucharMisClasesEstudiante(studentId) {
+  console.log("👂 Estudiante escuchando cambios en sus clases:", studentId);
+  
   // Evitar duplicar listeners
   if (unsubscribeMisClases) {
       unsubscribeMisClases();
   }
 
-  // Escucha cambios en tiempo real
+  // ⚡ Escucha cambios en tiempo real
   unsubscribeMisClases = db.collection('sessions')
     .where('student_id', '==', studentId)
     .orderBy('created_at', 'desc')
@@ -53,10 +56,29 @@ function escucharMisClasesEstudiante(studentId) {
       const contenedor = document.getElementById('mis-clases-container');
       if (!contenedor) return;
       
+      // Detectar cambios en tiempo real
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified') {
+          const data = change.doc.data();
+          console.log(`🔄 Solicitud actualizada: ${change.doc.id} -> status: ${data.status}`);
+          
+          // Notificación visual cuando aceptan
+          if (data.status === 'accepted') {
+            console.log("🎉 ¡Un mentor aceptó tu solicitud!");
+            // Opcional: mostrar notificación toast
+            mostrarNotificacion(`✅ ¡${data.mentor_name} aceptó tu clase!`);
+          }
+        }
+        
+        if (change.type === 'added') {
+          console.log(`🆕 Nueva clase agregada: ${change.doc.id}`);
+        }
+      });
+      
       contenedor.innerHTML = ''; // Limpiar
 
       if (snapshot.empty) {
-        contenedor.innerHTML = '<p style="color:#999; text-align:center; font-style:italic;">No tienes solicitudes activas. ¡Reserva una clase!</p>';
+        contenedor.innerHTML = '<p style="color:#999; text-align:center; font-style:italic; padding:20px;">No tienes solicitudes activas. ¡Reserva una clase!</p>';
         return;
       }
 
@@ -66,18 +88,19 @@ function escucharMisClasesEstudiante(studentId) {
         
         // Configuración visual de estados
         const estados = {
-            'pending':   { color: '#F6E05E', texto: '⏳ Pendiente', borde: '#F6E05E' },
-            'accepted':  { color: '#48BB78', texto: '✅ ¡Aceptada!', borde: '#48BB78' },
-            'rejected':  { color: '#F56565', texto: '❌ Rechazada', borde: '#F56565' },
-            'completed': { color: '#4299E1', texto: '🎓 Finalizada', borde: '#4299E1' }
+            'pending':   { color: '#F6E05E', texto: '⏳ Pendiente', borde: '#F6E05E', bg: '#FFFBEB' },
+            'accepted':  { color: '#48BB78', texto: '✅ ¡Aceptada!', borde: '#48BB78', bg: '#F0FFF4' },
+            'rejected':  { color: '#F56565', texto: '❌ Rechazada', borde: '#F56565', bg: '#FFF5F5' },
+            'completed': { color: '#4299E1', texto: '🎓 Finalizada', borde: '#4299E1', bg: '#EBF8FF' }
         };
 
-        const estado = estados[clase.status] || { color: '#ccc', texto: clase.status, borde: '#ccc' };
+        const estado = estados[clase.status] || { color: '#ccc', texto: clase.status, borde: '#ccc', bg: '#f5f5f5' };
 
         // Crear tarjeta de solicitud
         const card = document.createElement('div');
+        card.id = `clase-card-${claseId}`;
         card.style.cssText = `
-            background: white;
+            background: ${estado.bg};
             border-left: 5px solid ${estado.borde};
             padding: 15px;
             margin-bottom: 10px;
@@ -86,35 +109,49 @@ function escucharMisClasesEstudiante(studentId) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.3s ease;
         `;
 
         // Botón de acción según estado
         let botonAccion = '';
         if (clase.status === 'accepted') {
-            botonAccion = `<button onclick="entrarSalaEstudiante('${claseId}')" style="display:block; margin-top:5px; font-size:12px; color:white; background:#48BB78; border:none; padding:5px 10px; border-radius:15px; cursor:pointer; font-weight:bold;">📹 Entrar a Sala</button>`;
+            botonAccion = `<button onclick="entrarSalaEstudiante('${claseId}')" style="display:block; margin-top:8px; font-size:13px; color:white; background:#48BB78; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;" onmouseover="this.style.background='#38A169'" onmouseout="this.style.background='#48BB78'">📹 Entrar a Sala</button>`;
         } else if (clase.status === 'completed' && !clase.rated) {
-            botonAccion = `<button onclick="abrirModalCalificacion('${claseId}', '${clase.mentor_id}', '${clase.mentor_name}')" style="display:block; margin-top:5px; font-size:12px; color:white; background:#F6AD55; border:none; padding:5px 10px; border-radius:15px; cursor:pointer;">⭐ Calificar</button>`;
+            botonAccion = `<button onclick="abrirModalCalificacion('${claseId}', '${clase.mentor_id}', '${clase.mentor_name}')" style="display:block; margin-top:8px; font-size:13px; color:white; background:#F6AD55; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold;">⭐ Calificar</button>`;
         }
 
         card.innerHTML = `
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
             <div>
-                <h4 style="margin:0; color:#333; font-size:15px;">${clase.mentor_name}</h4>
+                <h4 style="margin:0; color:#333; font-size:16px; font-weight:700;">${clase.mentor_name}</h4>
                 <p style="margin:4px 0 0; font-size:13px; color:#666;">📚 ${clase.subject}</p>
                 <p style="margin:2px 0 0; font-size:12px; color:#999;">📅 ${clase.date} • ⏰ ${clase.time}</p>
+                <p style="margin:2px 0 0; font-size:12px; color:#666;">⏱️ Duración: <strong>${clase.duration}h</strong></p>
             </div>
             <div style="text-align:right;">
-                <span style="background: ${estado.color}20; color: ${estado.color}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid ${estado.color}40;">
+                <span style="background: ${estado.color}20; color: ${estado.color}; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; border: 1px solid ${estado.color}40;">
                     ${estado.texto}
                 </span>
-                <div style="margin-top:5px;">${botonAccion}</div>
+                <div style="margin-top:8px;">${botonAccion}</div>
             </div>
         `;
         contenedor.appendChild(card);
       });
+    }, (error) => {
+      console.error("❌ Error en listener estudiante:", error);
+      // Reintentar después de 3 segundos
+      setTimeout(() => {
+        console.log("🔄 Reintentando conexión...");
+        escucharMisClasesEstudiante(studentId);
+      }, 3000);
     });
 }
-
 // ===== 3. RESERVAR TUTORÍA (CONECTADO A FIREBASE) =====
 async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 1) {
   try {
@@ -122,6 +159,8 @@ async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 1) {
       alert('Debes iniciar sesión primero');
       return;
     }
+
+    console.log("📝 Creando solicitud para mentor:", tutorId);
 
     // Feedback inmediato
     const btnReserva = event?.target; 
@@ -136,29 +175,37 @@ async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 1) {
     const tutor = tutorDoc.data();
     const student = studentDoc.data();
 
-    // 2. Crear la sesión
-    await db.collection('sessions').add({
+    // 2. ⚡ CREAR LA SESIÓN CON LOGS DETALLADOS
+    const sessionData = {
       student_id: auth.currentUser.uid,
-      mentor_id: tutorId,
+      mentor_id: tutorId, // ⚡ CRÍTICO
       student_name: student.name,
       mentor_name: tutor.name,
       subject: materia,
       date: fecha,
       time: hora,
       duration: duracion,
-      status: 'pending', // Estado inicial
+      status: 'pending',
       rated: false,
       price: (tutor.hourly_rate || 5) * duracion,
       created_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    };
+
+    console.log("💾 Guardando sesión con estos datos:", sessionData);
+    
+    const docRef = await db.collection('sessions').add(sessionData);
+    
+    console.log("✅ Sesión creada con ID:", docRef.id);
+    console.log("🎯 mentor_id guardado:", tutorId);
+    console.log("👤 Para el mentor:", tutor.name);
 
     alert(`✅ ¡Solicitud enviada a ${tutor.name}!\n\nRevisa la sección "Mis Clases" para ver cuando te acepte.`);
     
-    // Restaurar botón (aunque la lista se actualiza sola)
+    // Restaurar botón
     if(btnReserva) { btnReserva.innerText = "Reservado"; }
     
   } catch (error) {
-    console.error("Error reservando:", error);
+    console.error("❌ Error reservando:", error);
     alert('Error al reservar: ' + error.message);
     if(btnReserva) { btnReserva.innerText = "Reintentar"; btnReserva.disabled = false; }
   }
@@ -237,4 +284,48 @@ function abrirModalCalificacion(sessionId, mentorId, mentorName) {
     if (rating && rating >= 1 && rating <= 5) {
         calificarMentor(sessionId, mentorId, parseInt(rating));
     }
+}
+
+// ===== NOTIFICACIÓN TOAST (OPCIONAL) =====
+function mostrarNotificacion(mensaje) {
+  // Crear elemento de notificación
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #48BB78;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 999999;
+    animation: slideInRight 0.3s ease;
+  `;
+  
+  toast.innerHTML = `
+    <style>
+      @keyframes slideInRight {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+      }
+    </style>
+    ${mensaje}
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Auto-ocultar después de 4 segundos
+  setTimeout(() => {
+    toast.style.animation = 'slideOutRight 0.3s ease';
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 300);
+  }, 4000);
 }
