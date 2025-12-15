@@ -1,8 +1,7 @@
 // ====================================
-// MÓDULO DEL MENTOR
+// MÓDULO DEL MENTOR - VERSIÓN MEJORADA
 // ====================================
 
-// ===== CARGAR DASHBOARD DEL MENTOR =====
 // ===== CARGAR DASHBOARD DEL MENTOR =====
 async function cargarDashboardMentor(mentorId) {
     console.log("🚀 Cargando Dashboard para Mentor:", mentorId);
@@ -12,9 +11,15 @@ async function cargarDashboardMentor(mentorId) {
         const mentorDoc = await db.collection('users').doc(mentorId).get();
         const mentor = mentorDoc.data();
 
-        // 2. Llenar datos visuales (Nombre, Wallet, etc)
+        // 2. Llenar datos visuales (Nombre, Wallet, Foto, etc)
         if (document.getElementById('mentor-dash-name')) 
             document.getElementById('mentor-dash-name').innerText = mentor.name;
+        
+        // ⚡ CARGAR FOTO DE PERFIL
+        if (document.getElementById('mentor-profile-pic')) {
+            const fotoURL = mentor.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name)}&background=4FBDBA`;
+            document.getElementById('mentor-profile-pic').src = fotoURL;
+        }
         
         if (document.getElementById('wallet-balance')) 
             document.getElementById('wallet-balance').textContent = "$" + (mentor.wallet_balance || 0).toFixed(2);
@@ -32,48 +37,28 @@ async function cargarDashboardMentor(mentorId) {
         // 3. CARGAR EL CALENDARIO
         inicializarCalendarioMentor(mentor.availability);
 
-        // 4. ⚡ ACTIVAR ESCUCHA EN TIEMPO REAL ⚡
-        console.log("🔥 Activando listener de solicitudes...");
-        
-        // DIAGNÓSTICO
-        console.log("📋 DIAGNÓSTICO:");
-        console.log("  - Mentor ID:", mentorId);
-        console.log("  - Esperando solicitudes con status='pending'");
+        // 4. ⚡ ACTIVAR ESCUCHAS EN TIEMPO REAL ⚡
+        console.log("🔥 Activando listeners en tiempo real...");
         
         escucharSolicitudesPendientes(mentorId);
-        verificarTarifaConfigrada(mentorId);
-        console.log("📅 Activando listener de clases aceptadas...");
         escucharClasesAceptadas(mentorId);
+        verificarTarifaConfigrada(mentorId);
         
-        // TEST: Verificar solicitudes existentes
-        setTimeout(async () => {
-            const testQuery = await db.collection('sessions')
-                .where('mentor_id', '==', mentorId)
-                .get();
-            console.log(`🔍 TEST: Total de sesiones para este mentor: ${testQuery.size}`);
-            
-            if (testQuery.size > 0) {
-                testQuery.forEach(doc => {
-                    const data = doc.data();
-                    console.log(`  - Sesión ${doc.id}: status=${data.status}, student=${data.student_name}`);
-                });
-            } else {
-                console.log("  ℹ️ No hay sesiones aún. Esperando nuevas solicitudes...");
-            }
-        }, 1000);
+        // 5. ⚡ MOSTRAR NOTIFICACIÓN DE BIENVENIDA
+        setTimeout(() => {
+            mostrarNotificacionMentor('✅ Panel de mentor cargado correctamente');
+        }, 500);
 
     } catch (error) {
         console.error("❌ Error cargando dashboard:", error);
+        alert('Error al cargar dashboard: ' + error.message);
     }
 }
 
 // ===== ESCUCHAR SOLICITUDES PENDIENTES EN TIEMPO REAL =====
-// ===== ESCUCHAR SOLICITUDES PENDIENTES EN TIEMPO REAL =====
-// ===== ESCUCHAR SOLICITUDES PENDIENTES EN TIEMPO REAL =====
 function escucharSolicitudesPendientes(mentorId) {
   console.log("👂 Escuchando solicitudes para:", mentorId);
   
-  // ⚡ CRÍTICO: Retornar el listener para que permanezca activo
   const unsubscribe = db.collection('sessions')
     .where('mentor_id', '==', mentorId)
     .where('status', '==', 'pending')
@@ -81,9 +66,17 @@ function escucharSolicitudesPendientes(mentorId) {
     .onSnapshot((snapshot) => {
       const solicitudes = [];
       
+      // ⚡ DETECTAR NUEVAS SOLICITUDES Y MOSTRAR NOTIFICACIÓN
       snapshot.docChanges().forEach((change) => {
         if (change.type === 'added') {
+          const data = change.doc.data();
           console.log("🆕 Nueva solicitud detectada:", change.doc.id);
+          
+          // 🔔 NOTIFICACIÓN EN TIEMPO REAL
+          mostrarNotificacionMentor(`🎉 Nueva solicitud de ${data.student_name}`);
+          
+          // 🔊 SONIDO DE NOTIFICACIÓN
+          reproducirSonidoNotificacion();
         }
       });
       
@@ -100,29 +93,29 @@ function escucharSolicitudesPendientes(mentorId) {
       const badge = document.getElementById('pending-badge');
       if (badge) {
         badge.textContent = solicitudes.length;
-        badge.style.display = 'inline-block';
+        badge.style.display = solicitudes.length > 0 ? 'inline-block' : 'none';
+        
+        // ⚡ ANIMACIÓN DE PULSO CUANDO HAY SOLICITUDES
+        if (solicitudes.length > 0) {
+          badge.style.animation = 'pulse 2s infinite';
+        }
       }
       
       // Mostrar en UI
       mostrarSolicitudesEnUI(solicitudes);
       
-      if (solicitudes.length > 0) {
-        console.log("🔔 Hay solicitudes pendientes!");
-      }
     }, (error) => {
       console.error("❌ Error en listener:", error);
-      // Reintentar conexión después de 3 segundos
       setTimeout(() => {
         console.log("🔄 Reintentando conexión...");
         escucharSolicitudesPendientes(mentorId);
       }, 3000);
     });
     
-  // Guardar referencia para poder cancelar después si es necesario
   window.mentorListener = unsubscribe;
   return unsubscribe;
 }
-// ===== MOSTRAR SOLICITUDES EN UI =====
+
 // ===== MOSTRAR SOLICITUDES EN UI =====
 function mostrarSolicitudesEnUI(solicitudes) {
   const container = document.getElementById('solicitudes-container');
@@ -203,35 +196,31 @@ function mostrarSolicitudesEnUI(solicitudes) {
   
   console.log(`✅ ${solicitudes.length} solicitud(es) renderizadas`);
 }
-// ===== ACEPTAR SOLICITUD =====
+
 // ===== ACEPTAR SOLICITUD =====
 async function aceptarSolicitud(sessionId) {
   try {
     console.log("✅ Aceptando solicitud:", sessionId);
     
-    // 1. Obtener datos de la sesión
     const sessionDoc = await db.collection('sessions').doc(sessionId).get();
     const sessionData = sessionDoc.data();
     
-    // 2. Actualizar estado de la sesión
     await db.collection('sessions').doc(sessionId).update({
       status: 'accepted',
       updated_at: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    // 3. ⚡ BLOQUEAR EL HORARIO EN LA DISPONIBILIDAD DEL MENTOR
+    // ⚡ BLOQUEAR HORARIO
     const mentorId = sessionData.mentor_id;
-    const fecha = sessionData.date; // "2025-01-15"
-    const hora = sessionData.time;  // "09:00"
+    const fecha = sessionData.date;
+    const hora = sessionData.time;
     
-    // Convertir fecha a día de la semana
     const fechaObj = new Date(fecha + 'T00:00:00');
     const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     const diaSemana = diasSemana[fechaObj.getDay()];
     
     console.log(`🔒 Bloqueando: ${diaSemana} a las ${hora}`);
     
-    // Actualizar disponibilidad
     const mentorDoc = await db.collection('users').doc(mentorId).get();
     const availability = mentorDoc.data().availability || {};
     
@@ -239,7 +228,6 @@ async function aceptarSolicitud(sessionId) {
       availability[diaSemana] = {};
     }
     
-    // Marcar como NO disponible (false)
     availability[diaSemana][hora] = false;
     
     await db.collection('users').doc(mentorId).update({
@@ -248,258 +236,34 @@ async function aceptarSolicitud(sessionId) {
     
     console.log("✅ Horario bloqueado correctamente");
     
-    alert('¡Solicitud aceptada! La clase ha sido confirmada y el horario bloqueado.');
+    mostrarNotificacionMentor('✅ Solicitud aceptada y calendario actualizado', 'success');
     
-    // Recargar calendario para mostrar cambios
     if (typeof inicializarCalendarioMentor === 'function') {
       inicializarCalendarioMentor(availability);
     }
     
   } catch (error) {
     console.error("❌ Error aceptando solicitud:", error);
-    alert('Error al aceptar: ' + error.message);
+    mostrarNotificacionMentor('Error al aceptar: ' + error.message, 'error');
   }
 }
+
 // ===== RECHAZAR SOLICITUD =====
 async function rechazarSolicitud(sessionId) {
   try {
     await db.collection('sessions').doc(sessionId).update({
       status: 'rejected',
-      updated_at: getTimestamp()
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    alert('Solicitud rechazada');
+    mostrarNotificacionMentor('Solicitud rechazada', 'info');
     
   } catch (error) {
     console.error("Error rechazando solicitud:", error);
   }
 }
 
-// ===== ESCUCHAR PRÓXIMAS CLASES =====
-function escucharProximasClases(mentorId) {
-  return db.collection('sessions')
-    .where('mentor_id', '==', mentorId)
-    .where('status', 'in', ['accepted', 'active'])
-    .orderBy('created_at', 'desc')
-    .onSnapshot((snapshot) => {
-      const clases = [];
-      snapshot.forEach(doc => {
-        clases.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
-      
-      console.log(`Próximas clases: ${clases.length}`);
-    });
-}
-
-// ===== FINALIZAR CLASE =====
-async function finalizarClaseFirebase(sessionId) {
-  try {
-    // Obtener datos de la sesión
-    const sessionDoc = await db.collection('sessions').doc(sessionId).get();
-    const session = sessionDoc.data();
-    
-    // Actualizar estado a completada
-    await db.collection('sessions').doc(sessionId).update({
-      status: 'completed',
-      completed_at: getTimestamp()
-    });
-    
-    // Transferir dinero a la billetera del mentor (85% del precio, 15% comisión)
-    const mentorGain = session.price * 0.85;
-    
-    await db.collection('users').doc(session.mentor_id).update({
-      wallet_balance: firebase.firestore.FieldValue.increment(mentorGain),
-      total_classes: firebase.firestore.FieldValue.increment(1)
-    });
-    
-    // Crear transacción
-    await db.collection('transactions').add({
-      session_id: sessionId,
-      mentor_id: session.mentor_id,
-      student_id: session.student_id,
-      amount: mentorGain,
-      type: 'class_payment',
-      created_at: getTimestamp()
-    });
-    
-    alert('¡Clase finalizada! El pago ha sido procesado.');
-    
-  } catch (error) {
-    console.error("Error finalizando clase:", error);
-  }
-}
-
-// En js/mentor-module.js
-
-// Variable temporal para guardar los cambios antes de enviarlos a Firebase
-let disponibilidadTemporal = {};
-
-function inicializarCalendarioMentor(disponibilidadActual = {}) {
-    const contenedor = document.getElementById('calendar-grid');
-    if (!contenedor) return;
-
-    // Guardamos lo que viene de Firebase o iniciamos vacío
-    disponibilidadTemporal = disponibilidadActual || {};
-
-    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-    const horas = ['09:00', '10:00', '11:00', '15:00', '16:00', '17:00'];
-
-    let html = '';
-
-    // 1. Crear encabezados de días
-    html += '<div style="grid-column: 1/-1; display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">';
-    html += '<div></div>'; // Espacio para la columna de horas
-    dias.forEach(d => {
-        html += `<div style="text-align: center; font-weight: bold; text-transform: capitalize; color: #555;">${d}</div>`;
-    });
-    html += '</div>';
-
-    // 2. Crear filas por hora
-    horas.forEach(hora => {
-        html += `<div style="display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">`;
-        
-        // Etiqueta de hora
-        html += `<div style="display:flex; align-items:center; justify-content:flex-end; padding-right:10px; font-size:12px; font-weight:bold; color:#666;">${hora}</div>`;
-
-        // Botones por día
-        dias.forEach(dia => {
-            // Verificar si esta hora ya está activa en la BD
-            // Nota: Normalizamos quitando los ':' si tu BD usa formato '0900', o dejándolos si usa '09:00'
-            const estaActivo = disponibilidadTemporal[dia] && disponibilidadTemporal[dia][hora] === true;
-            
-            const colorBg = estaActivo ? '#4FBDBA' : '#EDF2F7';
-            const colorTxt = estaActivo ? 'white' : '#A0AEC0';
-
-            html += `
-                <div onclick="toggleHora('${dia}', '${hora}', this)" 
-                     style="background: ${colorBg}; color: ${colorTxt}; border-radius: 6px; cursor: pointer; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;"
-                     data-activo="${estaActivo}">
-                     ${estaActivo ? '✓' : '·'}
-                </div>
-            `;
-        });
-        html += `</div>`;
-    });
-
-    // 3. Botón de guardar cambios
-    html += `
-        <div style="margin-top: 20px; text-align: right;">
-            <button onclick="guardarHorarioFirebase()" class="btn-primary" style="width: auto; padding: 10px 30px;">
-                💾 Guardar Mi Horario
-            </button>
-        </div>
-    `;
-
-    contenedor.innerHTML = html;
-    // Quitamos el estilo grid original del contenedor para usar el nuestro interno más flexible
-    contenedor.style.display = 'block'; 
-}
-
-// Función para marcar/desmarcar (visual y lógica)
-window.toggleHora = function(dia, hora, elemento) {
-    // Inicializar el día si no existe
-    if (!disponibilidadTemporal[dia]) disponibilidadTemporal[dia] = {};
-
-    // Cambiar estado
-    const estadoActual = elemento.getAttribute('data-activo') === 'true';
-    const nuevoEstado = !estadoActual;
-
-    // Actualizar lógica
-    disponibilidadTemporal[dia][hora] = nuevoEstado;
-
-    // Actualizar visual
-    elemento.setAttribute('data-activo', nuevoEstado);
-    elemento.style.background = nuevoEstado ? '#4FBDBA' : '#EDF2F7';
-    elemento.style.color = nuevoEstado ? 'white' : '#A0AEC0';
-    elemento.innerText = nuevoEstado ? '✓' : '·';
-};
-
-// Función para guardar en la BD
-window.guardarHorarioFirebase = async function() {
-    try {
-        const user = firebase.auth().currentUser;
-        if (!user) return;
-
-        await db.collection('users').doc(user.uid).update({
-            availability: disponibilidadTemporal
-        });
-        alert("✅ Horario actualizado. Los estudiantes ahora verán tu nueva disponibilidad.");
-    } catch (e) {
-        console.error(e);
-        alert("Error al guardar horario");
-    }
-};
-
-// ===== VERIFICAR SI NECESITA CONFIGURAR TARIFA =====
-async function verificarTarifaConfigrada(mentorId) {
-  try {
-    const mentorDoc = await db.collection('users').doc(mentorId).get();
-    const mentor = mentorDoc.data();
-    
-    const card = document.getElementById('tarifa-action-card');
-    if (!card) return;
-    
-    // Si ya tiene tarifa configurada (mayor a 0), ocultar la tarjeta
-    if (mentor.hourly_rate && mentor.hourly_rate > 0) {
-      card.style.display = 'none';
-      console.log("✅ Tarifa ya configurada: $" + mentor.hourly_rate);
-    } else {
-      card.style.display = 'block';
-      console.log("⚠️ Tarifa pendiente de configuración");
-    }
-  } catch (error) {
-    console.error("Error verificando tarifa:", error);
-  }
-}
-
-// ===== GUARDAR TARIFA (SOLO PRIMERA VEZ) =====
-async function validarTarifa() {
-    const rateInput = document.getElementById('mentor-rate');
-    const precio = parseFloat(rateInput.value);
-    
-    if (!precio || precio <= 0) {
-        alert("Por favor ingresa un precio válido (ej: 5)");
-        return;
-    }
-
-    try {
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            alert("Error: No estás autenticado");
-            return;
-        }
-
-        const btn = event.target;
-        const textoOriginal = btn.innerText;
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        // Guardar en Firebase
-        await db.collection('users').doc(user.uid).update({
-            hourly_rate: precio,
-            updated_at: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert(`✅ Tarifa configurada: $${precio}/hora`);
-        
-        // ⚡ OCULTAR LA TARJETA PERMANENTEMENTE
-        const card = document.getElementById('tarifa-action-card');
-        if (card) {
-            card.style.display = 'none';
-        }
-
-    } catch (error) {
-        console.error("Error guardando tarifa:", error);
-        alert("Hubo un error al guardar la tarifa.");
-        btn.innerText = textoOriginal;
-        btn.disabled = false;
-    }
-}
-
-// ===== ESCUCHAR CLASES ACEPTADAS (AGENDA DEL MENTOR) =====
+// ===== ESCUCHAR CLASES ACEPTADAS =====
 function escucharClasesAceptadas(mentorId) {
   console.log("📅 Escuchando clases aceptadas para mentor:", mentorId);
   
@@ -518,17 +282,13 @@ function escucharClasesAceptadas(mentorId) {
       
       console.log(`📚 Clases agendadas: ${clasesAceptadas.length}`);
       
-      // Ordenar por fecha manualmente
       clasesAceptadas.sort((a, b) => {
         const fechaA = new Date(a.date + 'T' + a.time);
         const fechaB = new Date(b.date + 'T' + b.time);
-        return fechaA - fechaB; // Más próximas primero
+        return fechaA - fechaB;
       });
       
-      // Actualizar UI
       mostrarClasesAceptadasEnUI(clasesAceptadas);
-      
-      // Actualizar tarjeta de "Próxima Clase"
       actualizarProximaClase(clasesAceptadas);
       
     }, (error) => {
@@ -544,6 +304,7 @@ function mostrarClasesAceptadasEnUI(clases) {
   container.innerHTML = '';
   const badge = document.getElementById('clases-count');
   if (badge) badge.textContent = clases.length;
+  
   if (clases.length === 0) {
     container.innerHTML = `
       <div style="text-align:center; padding:30px; background:white; border-radius:16px; border:2px dashed #E2E8F0;">
@@ -625,7 +386,6 @@ function actualizarProximaClase(clases) {
     return;
   }
   
-  // Mostrar la clase más próxima
   const proximaClase = clases[0];
   const fechaObj = new Date(proximaClase.date + 'T' + proximaClase.time);
   const fechaFormateada = fechaObj.toLocaleDateString('es-ES', { 
@@ -648,5 +408,214 @@ function actualizarProximaClase(clases) {
         📹 Iniciar Ahora
       </button>
     `;
+  }
+}
+
+// ===== CALENDARIO =====
+let disponibilidadTemporal = {};
+
+function inicializarCalendarioMentor(disponibilidadActual = {}) {
+    const contenedor = document.getElementById('calendar-grid');
+    if (!contenedor) return;
+
+    disponibilidadTemporal = disponibilidadActual || {};
+
+    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const horas = ['09:00', '10:00', '11:00', '15:00', '16:00', '17:00'];
+
+    let html = '';
+    html += '<div style="grid-column: 1/-1; display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">';
+    html += '<div></div>';
+    dias.forEach(d => {
+        html += `<div style="text-align: center; font-weight: bold; text-transform: capitalize; color: #555;">${d}</div>`;
+    });
+    html += '</div>';
+
+    horas.forEach(hora => {
+        html += `<div style="display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">`;
+        html += `<div style="display:flex; align-items:center; justify-content:flex-end; padding-right:10px; font-size:12px; font-weight:bold; color:#666;">${hora}</div>`;
+
+        dias.forEach(dia => {
+            const estaActivo = disponibilidadTemporal[dia] && disponibilidadTemporal[dia][hora] === true;
+            const colorBg = estaActivo ? '#4FBDBA' : '#EDF2F7';
+            const colorTxt = estaActivo ? 'white' : '#A0AEC0';
+
+            html += `
+                <div onclick="toggleHora('${dia}', '${hora}', this)" 
+                     style="background: ${colorBg}; color: ${colorTxt}; border-radius: 6px; cursor: pointer; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;"
+                     data-activo="${estaActivo}">
+                     ${estaActivo ? '✓' : '·'}
+                </div>
+            `;
+        });
+        html += `</div>`;
+    });
+
+    html += `
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="guardarHorarioFirebase()" class="btn-primary" style="width: auto; padding: 10px 30px;">
+                💾 Guardar Mi Horario
+            </button>
+        </div>
+    `;
+
+    contenedor.innerHTML = html;
+    contenedor.style.display = 'block';
+}
+
+window.toggleHora = function(dia, hora, elemento) {
+    if (!disponibilidadTemporal[dia]) disponibilidadTemporal[dia] = {};
+
+    const estadoActual = elemento.getAttribute('data-activo') === 'true';
+    const nuevoEstado = !estadoActual;
+
+    disponibilidadTemporal[dia][hora] = nuevoEstado;
+
+    elemento.setAttribute('data-activo', nuevoEstado);
+    elemento.style.background = nuevoEstado ? '#4FBDBA' : '#EDF2F7';
+    elemento.style.color = nuevoEstado ? 'white' : '#A0AEC0';
+    elemento.innerText = nuevoEstado ? '✓' : '·';
+};
+
+window.guardarHorarioFirebase = async function() {
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        await db.collection('users').doc(user.uid).update({
+            availability: disponibilidadTemporal
+        });
+        mostrarNotificacionMentor("✅ Horario actualizado correctamente", 'success');
+    } catch (e) {
+        console.error(e);
+        mostrarNotificacionMentor("Error al guardar horario", 'error');
+    }
+};
+
+// ===== VERIFICAR TARIFA =====
+async function verificarTarifaConfigrada(mentorId) {
+  try {
+    const mentorDoc = await db.collection('users').doc(mentorId).get();
+    const mentor = mentorDoc.data();
+    
+    const card = document.getElementById('tarifa-action-card');
+    if (!card) return;
+    
+    if (mentor.hourly_rate && mentor.hourly_rate > 0) {
+      card.style.display = 'none';
+      console.log("✅ Tarifa ya configurada: $" + mentor.hourly_rate);
+    } else {
+      card.style.display = 'block';
+      console.log("⚠️ Tarifa pendiente de configuración");
+    }
+  } catch (error) {
+    console.error("Error verificando tarifa:", error);
+  }
+}
+
+async function validarTarifa() {
+    const rateInput = document.getElementById('mentor-rate');
+    const precio = parseFloat(rateInput.value);
+    
+    if (!precio || precio <= 0) {
+        mostrarNotificacionMentor("Por favor ingresa un precio válido", 'warning');
+        return;
+    }
+
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        await db.collection('users').doc(user.uid).update({
+            hourly_rate: precio,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        mostrarNotificacionMentor(`✅ Tarifa configurada: $${precio}/hora`, 'success');
+        
+        const card = document.getElementById('tarifa-action-card');
+        if (card) card.style.display = 'none';
+
+    } catch (error) {
+        console.error("Error guardando tarifa:", error);
+        mostrarNotificacionMentor("Error al guardar la tarifa", 'error');
+    }
+}
+
+// ===== SISTEMA DE NOTIFICACIONES =====
+function mostrarNotificacionMentor(mensaje, tipo = 'success') {
+  const colores = {
+    success: '#48BB78',
+    info: '#4299E1',
+    warning: '#F6AD55',
+    error: '#F56565'
+  };
+  
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${colores[tipo]};
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 999999;
+    animation: slideInRight 0.3s ease;
+    max-width: 350px;
+  `;
+  
+  toast.innerHTML = `
+    <style>
+      @keyframes slideInRight {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+    </style>
+    ${mensaje}
+  `;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOutRight 0.3s ease';
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 300);
+  }, 4000);
+}
+
+function reproducirSonidoNotificacion() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (error) {
+    console.log('Audio no disponible');
   }
 }

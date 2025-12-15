@@ -748,7 +748,17 @@
             /* Un borde casi invisible para definición extra */
             border: 1px solid rgba(0,0,0,0.02); 
         }
-
+        /* Animación para el badge de solicitudes */
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% { 
+                transform: scale(1.1); 
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+        }
         /* CANDADO DE SEGURIDAD */
         .sidebar-tabs { display: flex; border-bottom: 1px solid #eee; }
         .tab { flex: 1; text-align: center; padding: 15px; font-size: 14px; color: #666; cursor: pointer; }
@@ -879,7 +889,7 @@
                             Salir ⏻
                         </button>
                         <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px 5px 5px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-                            <img id="mentor-profile-pic" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee;">
+                            <img id="mentor-profile-pic" src="https://ui-avatars.com/api/?name=Mentor&background=4FBDBA" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee;">
                             <span style="font-size: 13px; font-weight: 600; color: #2d3748;">En línea</span>
                             <div style="width: 10px; height: 10px; background: #27AE60; border-radius: 50%;"></div>
                         </div>
@@ -901,8 +911,12 @@
                         <div class="stat-sub" style="color: #718096;" id="reviews-count-text">Nuevo Mentor</div>
                     </div>
 
-                    <div class="sapiens-card card-next" id="next-class-card" style="display: none;">
+                    <div class="sapiens-card card-next" id="next-class-card" style="display: none; flex-direction: column; justify-content: center;">
+                        <div class="stat-title"><span>📅 Próxima Clase</span></div>
+                        <div id="next-class-content" style="margin-top:10px;">
+                            <!-- Se llena dinámicamente -->
                         </div>
+                    </div>
                     
                     <div class="sapiens-card" id="empty-state-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 2px dashed #cbd5e0;">
                         <div style="font-size: 30px; margin-bottom: 10px;">😴</div>
@@ -2459,6 +2473,7 @@
     <!-- BACKEND SAPIENS -->
     <!-- ========================================== -->
     <script src="js/firebase-config.js"></script>
+    <script src="js/validations.js"></script>
     <script src="js/auth-module.js"></script>
     <script src="js/student-module.js"></script>
     <script src="js/mentor-module.js"></script>
