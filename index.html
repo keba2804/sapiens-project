@@ -802,12 +802,22 @@
             </div>
 
             <div style="margin-bottom: 30px;">
-                <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px;">Materias a dictar</label>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Cálculo</span>
-                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Física</span>
-                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Python</span>
+                <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px;">Materias a dictar (selecciona al menos una)</label>
+                <div id="materias-selector" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <span class="materia-chip" data-materia="Cálculo 1" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Cálculo 1</span>
+                    <span class="materia-chip" data-materia="Cálculo 2" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Cálculo 2</span>
+                    <span class="materia-chip" data-materia="Física 1" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Física 1</span>
+                    <span class="materia-chip" data-materia="Física 2" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Física 2</span>
+                    <span class="materia-chip" data-materia="Fundamentos de Programación" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Fundamentos de Programación</span>
+                    <span class="materia-chip" data-materia="Programación Orientada a Objetos" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">POO</span>
+                    <span class="materia-chip" data-materia="Estadística 1" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Estadística 1</span>
+                    <span class="materia-chip" data-materia="Álgebra Lineal" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Álgebra Lineal</span>
+                    <span class="materia-chip" data-materia="Ecuaciones Diferenciales" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Ecuaciones Diferenciales</span>
+                    <span class="materia-chip" data-materia="Estructuras de Datos" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Estructuras de Datos</span>
+                    <span class="materia-chip" data-materia="Bases de Datos" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Bases de Datos</span>
+                    <span class="materia-chip" data-materia="Química" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="toggleMateria(this)">Química</span>
                 </div>
+                <p id="materias-error" style="color: #E53E3E; font-size: 12px; margin-top: 8px; display: none;">⚠️ Selecciona al menos una materia</p>
             </div>
 
             <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="finalizarValidacionMentor()">
@@ -2312,8 +2322,37 @@
             }
         }
 
-        // Función para el botón final de la validación
+// Función para el botón final de la validación
         function finalizarValidacionMentor() {
+            // Obtener materias seleccionadas
+            const materiasSeleccionadas = [];
+            document.querySelectorAll('.materia-chip.selected').forEach(chip => {
+                materiasSeleccionadas.push(chip.getAttribute('data-materia'));
+            });
+            
+            // Validar que haya al menos una materia
+            if (materiasSeleccionadas.length === 0) {
+                document.getElementById('materias-error').style.display = 'block';
+                return;
+            }
+            
+            // Validar tarifa
+            const precioHora = parseFloat(document.getElementById('mentor-rate-input')?.value);
+            if (!precioHora || precioHora <= 0) {
+                alert("⚠️ Debes definir tu tarifa por hora para continuar.");
+                document.getElementById('mentor-rate-input').focus();
+                return;
+            }
+            
+            if (precioHora < 1 || precioHora > 50) {
+                alert("⚠️ La tarifa debe estar entre $1 y $50 por hora.");
+                document.getElementById('mentor-rate-input').focus();
+                return;
+            }
+            
+            // Obtener universidad
+            const universidad = document.querySelector('select')?.value || 'ESPOL';
+            
             // Simula envío de datos
             document.getElementById('mentor-validation-screen').style.display = 'none';
             
@@ -2326,7 +2365,27 @@
                 document.getElementById('mentor-dash-name').innerText = user;
             }
             
-            alert("✅ Perfil verificado. Bienvenido al equipo de Mentores.");
+            alert(`✅ Perfil verificado.\n\nMaterias: ${materiasSeleccionadas.join(', ')}\nTarifa: $${precioHora}/hora\n\nBienvenido al equipo de Mentores.`);
+        }
+
+        // Función para seleccionar/deseleccionar materias
+        function toggleMateria(elemento) {
+            elemento.classList.toggle('selected');
+            if (elemento.classList.contains('selected')) {
+                elemento.style.backgroundColor = '#4FBDBA';
+                elemento.style.color = 'white';
+                elemento.style.borderColor = '#4FBDBA';
+            } else {
+                elemento.style.backgroundColor = 'transparent';
+                elemento.style.color = '#333';
+                elemento.style.borderColor = '#ddd';
+            }
+            
+            // Ocultar error si hay al menos una seleccionada
+            const haySeleccionadas = document.querySelectorAll('.materia-chip.selected').length > 0;
+            if (haySeleccionadas) {
+                document.getElementById('materias-error').style.display = 'none';
+            }
         }
 
         function finalizarMentorFlow() {
@@ -2382,14 +2441,27 @@
             }
         };
 
-        // OVERRIDE: Función finalizarValidacionMentor
+                // OVERRIDE: Función finalizarValidacionMentor
         const finalizarValidacionMentorOriginal = finalizarValidacionMentor;
         finalizarValidacionMentor = async function() {
             const nombre = localStorage.getItem('tempNombre');
             const email = localStorage.getItem('tempEmail');
             const password = localStorage.getItem('tempPassword');
-            const universidad = document.getElementById('mentor-university')?.value || 'ESPOL';
-            const materias = document.getElementById('mentor-subjects')?.value || 'Cálculo';
+            const universidad = document.querySelector('select')?.value || 'ESPOL';
+            
+            // ⚡ OBTENER MATERIAS SELECCIONADAS CORRECTAMENTE
+            const materiasSeleccionadas = [];
+            document.querySelectorAll('.materia-chip.selected').forEach(chip => {
+                materiasSeleccionadas.push(chip.getAttribute('data-materia'));
+            });
+            
+            // Validar que haya al menos una materia
+            if (materiasSeleccionadas.length === 0) {
+                document.getElementById('materias-error').style.display = 'block';
+                alert("⚠️ Debes seleccionar al menos una materia");
+                return;
+            }
+            
             const precioHora = parseFloat(document.getElementById('mentor-rate-input')?.value);
             
             // ⚡ VALIDACIÓN DE TARIFA
@@ -2406,7 +2478,8 @@
             }
             
             try {
-                await registrarMentor(email, password, nombre, universidad, materias, precioHora);
+                console.log("📚 Registrando mentor con materias:", materiasSeleccionadas);
+                await registrarMentor(email, password, nombre, universidad, materiasSeleccionadas, precioHora);
                 localStorage.removeItem('tempNombre');
                 localStorage.removeItem('tempEmail');
                 localStorage.removeItem('tempPassword');
