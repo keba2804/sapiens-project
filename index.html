@@ -507,10 +507,22 @@
             background-color: var(--primary-hover);
         }
 
-        /* --- ESTILOS PANTALLA DETALLES DEL CURSO (NUEVO) --- */
         #course-details-view {
-            display: none; /* Oculto por defecto */
+            display: none;
             animation: fadeIn 0.5s;
+            /* FIXES CRÍTICOS PARA QUE SE VEA */
+            position: relative;
+            background: #F7F9FC;
+            min-height: 100vh;
+            width: 100%;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* Cuando se active, que se vea correctamente */
+        #course-details-view[style*="display: block"] {
+            display: block !important;
+            z-index: 10;
         }
 
         /* Sección Hero/Banner */
