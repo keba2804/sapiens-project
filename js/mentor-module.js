@@ -42,6 +42,8 @@ async function cargarDashboardMentor(mentorId) {
         
         escucharSolicitudesPendientes(mentorId);
         verificarTarifaConfigrada(mentorId);
+        console.log("📅 Activando listener de clases aceptadas...");
+        escucharClasesAceptadas(mentorId);
         
         // TEST: Verificar solicitudes existentes
         setTimeout(async () => {
@@ -495,4 +497,156 @@ async function validarTarifa() {
         btn.innerText = textoOriginal;
         btn.disabled = false;
     }
+}
+
+// ===== ESCUCHAR CLASES ACEPTADAS (AGENDA DEL MENTOR) =====
+function escucharClasesAceptadas(mentorId) {
+  console.log("📅 Escuchando clases aceptadas para mentor:", mentorId);
+  
+  return db.collection('sessions')
+    .where('mentor_id', '==', mentorId)
+    .where('status', '==', 'accepted')
+    .onSnapshot((snapshot) => {
+      const clasesAceptadas = [];
+      
+      snapshot.forEach(doc => {
+        clasesAceptadas.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      console.log(`📚 Clases agendadas: ${clasesAceptadas.length}`);
+      
+      // Ordenar por fecha manualmente
+      clasesAceptadas.sort((a, b) => {
+        const fechaA = new Date(a.date + 'T' + a.time);
+        const fechaB = new Date(b.date + 'T' + b.time);
+        return fechaA - fechaB; // Más próximas primero
+      });
+      
+      // Actualizar UI
+      mostrarClasesAceptadasEnUI(clasesAceptadas);
+      
+      // Actualizar tarjeta de "Próxima Clase"
+      actualizarProximaClase(clasesAceptadas);
+      
+    }, (error) => {
+      console.error("❌ Error escuchando clases aceptadas:", error);
+    });
+}
+
+// ===== MOSTRAR CLASES ACEPTADAS EN UI =====
+function mostrarClasesAceptadasEnUI(clases) {
+  const container = document.getElementById('clases-aceptadas-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  const badge = document.getElementById('clases-count');
+  if (badge) badge.textContent = clases.length;
+  if (clases.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:30px; background:white; border-radius:16px; border:2px dashed #E2E8F0;">
+        <div style="font-size:40px; margin-bottom:10px; opacity:0.5;">📭</div>
+        <p style="color:#999; margin:0; font-size:14px;">No tienes clases agendadas</p>
+      </div>
+    `;
+    return;
+  }
+  
+  clases.forEach(clase => {
+    const fechaObj = new Date(clase.date + 'T' + clase.time);
+    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
+    const div = document.createElement('div');
+    div.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border-left: 4px solid #48BB78;
+      transition: transform 0.2s;
+      cursor: pointer;
+    `;
+    
+    div.onmouseover = () => div.style.transform = 'translateY(-3px)';
+    div.onmouseout = () => div.style.transform = 'translateY(0)';
+    
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:start;">
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(clase.student_name)}&background=48BB78&color=fff" 
+                 style="width:40px; height:40px; border-radius:50%; border:2px solid #48BB78;">
+            <div>
+              <h4 style="margin:0; font-size:16px; color:#333;">${clase.student_name}</h4>
+              <span style="background:#F0FFF4; color:#48BB78; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;">
+                Confirmada
+              </span>
+            </div>
+          </div>
+          
+          <div style="margin-left:50px;">
+            <p style="margin:5px 0; color:#666; font-size:14px;">📚 <strong>${clase.subject}</strong></p>
+            <p style="margin:5px 0; color:#666; font-size:13px;">📅 ${fechaFormateada} • ⏰ ${clase.time}</p>
+            <p style="margin:5px 0; color:#666; font-size:13px;">⏱️ Duración: <strong>${clase.duration}h</strong></p>
+            <p style="margin:8px 0 0 0; font-weight:bold; color:#48BB78; font-size:16px;">💰 ${formatPrice(clase.price)}</p>
+          </div>
+        </div>
+        
+        <div>
+          <button onclick="iniciarSalaMentor('${clase.id}')" 
+                  style="background:#48BB78; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold; font-size:13px; transition:0.2s;"
+                  onmouseover="this.style.background='#38A169'" 
+                  onmouseout="this.style.background='#48BB78'">
+            📹 Iniciar Clase
+          </button>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(div);
+  });
+}
+
+// ===== ACTUALIZAR TARJETA DE PRÓXIMA CLASE =====
+function actualizarProximaClase(clases) {
+  const emptyCard = document.getElementById('empty-state-card');
+  const nextClassCard = document.getElementById('next-class-card');
+  
+  if (clases.length === 0) {
+    if (emptyCard) emptyCard.style.display = 'flex';
+    if (nextClassCard) nextClassCard.style.display = 'none';
+    return;
+  }
+  
+  // Mostrar la clase más próxima
+  const proximaClase = clases[0];
+  const fechaObj = new Date(proximaClase.date + 'T' + proximaClase.time);
+  const fechaFormateada = fechaObj.toLocaleDateString('es-ES', { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+  
+  if (emptyCard) emptyCard.style.display = 'none';
+  if (nextClassCard) {
+    nextClassCard.style.display = 'flex';
+    nextClassCard.innerHTML = `
+      <div class="stat-title"><span>📅 Próxima Clase</span></div>
+      <div style="margin-top:10px;">
+        <h4 style="margin:0 0 5px 0; font-size:18px; color:#333;">${proximaClase.student_name}</h4>
+        <p style="margin:0; font-size:13px; color:#666;">📚 ${proximaClase.subject}</p>
+        <p style="margin:5px 0; font-size:14px; color:#4FBDBA; font-weight:bold;">📅 ${fechaFormateada} • ⏰ ${proximaClase.time}</p>
+      </div>
+      <button onclick="iniciarSalaMentor('${proximaClase.id}')" style="margin-top:15px; width:100%; padding:10px; background:#48BB78; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:13px;">
+        📹 Iniciar Ahora
+      </button>
+    `;
+  }
 }
