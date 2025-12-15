@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapiens - Acceso</title>
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        :root {
+            --primary: #4FBDBA; /* Turquesa Sapiens */
+            --primary-hover: #3CAEA5;
+            --dark: #333;
+            --light: #F4F7F6;
+            --gray-text: #666;
+        }
+        
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F7F9FC;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- PANTALLA 1: SELECCIÓN DE ROL --- */
+        #role-screen {
+            background: white;
+            width: 800px;
+            max-width: 90%;
+            border-radius: 20px;
+            text-align: center;
+            display: block; 
+        }
+
+        .role-header {
+            background-color: #EBF6FB;
+            padding: 40px 20px;
+            border-radius: 20px;
+        }
+
+        .role-header h1 { margin: 0 0 40px 0; color: black; }
+
+        .roles-container {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding-bottom: 20px;
+        }
+
+        .role-card { cursor: pointer; transition: transform 0.3s; }
+        .role-card:hover { transform: scale(1.05); }
+
+        .role-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid white;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        /* --- PANTALLA 2: LOGIN / REGISTRO --- */
+        #auth-screen {
+            display: none;
+            width: 1000px;
+            max-width: 95%;
+            height: 680px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .auth-left {
+            width: 50%;
+            background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-left::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+        }
+
+        .auth-left h2 {
+            position: relative;
+            color: white;
+            font-size: 42px;
+            font-weight: 800;
+            text-align: center;
+            padding: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .auth-right {
+            width: 50%;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px; left: 20px;
+            cursor: pointer; color: #999; font-size: 14px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .toggle-container {
+            display: flex;
+            background-color: #A0D9D6;
+            border-radius: 30px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: background 0.3s;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center; color: var(--gray-text);
+            margin-bottom: 25px; font-size: 14px;
+        }
+
+        label {
+            font-size: 13px; font-weight: bold; color: var(--dark);
+            margin-bottom: 5px; display: block;
+        }
+
+        input {
+            width: 100%; padding: 12px 15px; margin-bottom: 15px;
+            border: 1px solid #E0E0E0; border-radius: 25px;
+            font-size: 14px; outline: none; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .extra-options {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; color: var(--gray-text); margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            width: 100%; padding: 12px;
+            background-color: var(--primary); color: white;
+            border: none; border-radius: 25px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: background 0.3s; margin-top: 10px;
+        }
+        .btn-main {
+            width: 100%; 
+            padding: 12px;
+            background-color: var(--primary); 
+            color: white;
+            border: none; 
+            border-radius: 8px;
+            font-size: 14px; 
+            font-weight: bold; 
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-main:hover { 
+            background-color: var(--primary-hover); 
+        }
+
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        .hidden { display: none; }
+
+        /* --- PANTALLA 3: MARKETPLACE --- */
+        #marketplace-screen {
+            display: none; 
+            width: 100%; 
+            max-width: 1200px;
+            min-height: 100vh; 
+            padding: 40px 20px;
+            margin: 0 auto; 
+            box-sizing: border-box;
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+
+        .header-container {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05); /* Una línea sutil separadora */
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        
+        /* Estilos Generales de Tarjetas */
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        
+        /* --- ESTILOS TARJETAS DE TUTORÍA (RECOMENDADOS) --- */
+        .tutor-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            border: 1px solid #f0f0f0;
+        }
+        .tutor-card:hover { transform: translateY(-5px); }
+        .tutor-card img.main-img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; }
+        .stars { color: #F2C94C; font-size: 14px; margin-bottom: 8px; letter-spacing: 1px; }
+        .tutor-card h4 { margin: 0 0 10px 0; font-size: 17px; color: var(--dark); line-height: 1.3; }
+        .tutor-card .desc { font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 20px; flex-grow: 1; }
+        .tutor-row { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f5f5f5; width: 100%; }
+        .tutor-info { display: flex; align-items: center; gap: 10px; }
+        .tutor-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .tutor-name { font-size: 13px; font-weight: 600; color: #444; }
+        .price-tag { font-weight: 800; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .price-old { text-decoration: line-through; color: #ccc; font-size: 13px; font-weight: normal; }
+
+        /* --- ESTILOS TARJETAS CURSOS GRABADOS --- */
+        .course-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; }
+        .tutor-mini { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #555; margin-top: 10px;}
+        .tutor-mini img { width: 30px; height: 30px; border-radius: 50%; margin: 0; object-fit: cover; }
+
+        /* --- ESTILOS HERRAMIENTAS --- */
+        .tool-card {
+            background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;
+        }
+        .tool-card:hover { transform: translateY(-5px); }
+        .tool-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; }
+        .tool-tag { font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .tool-card h4 { margin: 0 0 10px 0; font-size: 18px; color: var(--dark); }
+        .tool-card .desc { font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 20px; flex-grow: 1; }
+        .btn-tool { width: 100%; padding: 12px; border-radius: 10px; border: none; background-color: var(--primary); color: white; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: auto; }
+        .btn-tool:hover { background-color: var(--primary-hover); box-shadow: 0 4px 10px rgba(79, 189, 186, 0.4); }
+        .btn-tool.secondary { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-tool.secondary:hover { background-color: var(--primary); color: white; }
+
+        /* --- ESTILOS VISTA DE BÚSQUEDA --- */
+        #search-results-view {
+            display: none; /* Oculto por defecto */
+            animation: fadeIn 0.5s;
+        }
+        .search-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .btn-back {
+            background: none; border: none; color: #666; font-size: 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-back:hover { color: var(--primary); }
+
+        /* --- ESTILOS MENTOR 2.0 (MEJORADO) --- */
+        .mentor-container {
+            max-width: 1200px; margin: 0 auto; padding: 40px 20px;
+        }
+
+        /* Grid superior de 3 tarjetas */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Estilo unificado de tarjetas (Igual al estudiante) */
+        .sapiens-card {
+            background: white;
+            border-radius: 24px; /* Bordes más redondos */
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06); /* Sombra suave y elegante */
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .sapiens-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        }
+
+        /* Decoración para tarjeta de Ganancias */
+        .card-earnings { border-bottom: 4px solid var(--primary); }
+        .card-rating { border-bottom: 4px solid #F2C94C; }
+        .card-next { background: linear-gradient(145deg, #ffffff 0%, #f0fbfb 100%); border: 1px solid #bceceb; }
+
+        /* Tipografía interna */
+        .stat-title {
+            font-size: 13px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+        }
+        .stat-number {
+            font-size: 42px; font-weight: 800; color: #2d3748; margin-bottom: 5px; letter-spacing: -1px;
+        }
+        .stat-sub { font-size: 14px; font-weight: 500; }
+        .trend-up { color: #27AE60; background: #E8F5E9; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+        /* Layout inferior (2 columnas) */
+        .dashboard-lower-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Izquierda ancha, derecha angosta */
+            gap: 30px;
+        }
+
+        /* Lista de Solicitudes (Tipo Notificación iOS) */
+        .req-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f5f5f5;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.2s;
+        }
+        .req-card:hover { border-color: var(--primary); transform: scale(1.01); }
+
+        .req-left { display: flex; gap: 15px; align-items: center; }
+        .req-img { width: 55px; height: 55px; border-radius: 15px; object-fit: cover; }
+        .req-details h4 { margin: 0 0 5px 0; font-size: 16px; color: #333; }
+        .req-tag { background: #E0F2F1; color: var(--primary); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+
+        .req-buttons { display: flex; gap: 10px; }
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s;
+        }
+        .btn-yes { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(79, 189, 186, 0.4); }
+        .btn-yes:hover { background: #3CAEA5; transform: translateY(-2px); }
+        .btn-no { background: #FFF5F5; color: #E53E3E; }
+        .btn-no:hover { background: #FED7D7; }
+
+        /* Lista de Herramientas (Compacta) */
+        .tool-item {
+            display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0;
+        }
+        .tool-icon {
+            width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; margin-right: 15px;
+        }
+        .pdf-icon { background: #FFEBEE; color: #D32F2F; }
+        .sim-icon { background: #E3F2FD; color: #1976D2; }
+
+        /* Botón Upload */
+        .btn-upload {
+            width: 100%; padding: 15px; border: 2px dashed #cbd5e0; background: #f7fafc; color: #718096; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.2s;
+        }
+        .btn-upload:hover { border-color: var(--primary); color: var(--primary); background: #E0F2F1; }
+
+        /* Responsive para móviles */
+        @media (max-width: 800px) {
+            .dashboard-lower-grid { grid-template-columns: 1fr; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* --- ESTILOS NUEVOS PARA LA BÚSQUEDA AVANZADA --- */
+        
+        .search-hero {
+            background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            color: white;
+        }
+        /* Capa oscura para que se lea el texto sobre la foto */
+        .search-hero::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(45, 156, 219, 0.8); /* Azul Sapiens con transparencia */
+            border-radius: 20px;
+        }
+        .search-content { position: relative; z-index: 1; }
+
+        .search-bar-big {
+            display: flex; background: white; padding: 8px; border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
+        .search-bar-big input {
+            flex-grow: 1; border: none; padding: 15px; font-size: 16px; outline: none; margin: 0;
+        }
+        .search-bar-big button {
+            width: auto; padding: 0 40px; border-radius: 8px; margin: 0;
+        }
+
+        .filters-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-select {
+            background: white; color: #333; padding: 10px 15px; border-radius: 8px;
+            border: none; font-weight: bold; font-size: 14px; cursor: pointer; outline: none;
+        }
+
+        .section-title { font-size: 22px; margin: 40px 0 20px 0; color: var(--dark); }
+
+        /* Estilos para las tarjetas de Mentor en búsqueda */
+        .mentor-card {
+            background: white; border-radius: 15px; padding: 30px 20px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+        }
+        .mentor-card img {
+            width: 120px; height: 120px; border-radius: 10px; object-fit: cover; margin-bottom: 15px;
+        }
+        .mentor-card h4 { margin: 0 0 5px 0; font-size: 18px; }
+        .mentor-card p { font-size: 13px; color: #777; line-height: 1.4; }
+
+        /* --- MEJORA VISUAL DE TARJETAS DE MENTOR (SEARCH) --- */
+        
+        /* Esto asegura que las tarjetas no se estiren al infinito */
+        #mentors-results-grid {
+            display: flex;
+            justify-content: center; /* Esto los centra horizontalmente */
+            gap: 30px; /* Un poco más de espacio entre ellos */
+            flex-wrap: wrap; /* Para que bajen si no caben */
+            margin-bottom: 40px;
+        }
+
+        .mentor-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 240px; /* Ancho fijo para que se vean uniformes */
+        }
+        .mentor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-color: var(--primary); /* Borde turquesa al pasar el mouse */
+        }
+
+        .mentor-card img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .mentor-card h4 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .mentor-card p {
+            font-size: 13px;
+            color: #777;
+            margin: 0 0 20px 0;
+            font-weight: 500;
+        }
+
+        /* Botón de mentor mejorado (más pequeño y elegante) */
+        .mentor-card button {
+            margin-top: auto; /* Lo empuja al fondo */
+            padding: 8px 25px;
+            width: auto; /* No ocupa todo el ancho */
+            border-radius: 50px; /* Botón píldora */
+            font-size: 13px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .mentor-card button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- ESTILOS PANTALLA DETALLES DEL CURSO (NUEVO) --- */
+        #course-details-view {
+            display: none; /* Oculto por defecto */
+            animation: fadeIn 0.5s;
+        }
+
+        /* Sección Hero/Banner */
+        .detail-hero {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            background: #f8f9fa; /* Fondo gris claro sutil */
+            padding: 30px;
+            border-radius: 20px;
+        }
+        .detail-hero-img {
+            width: 180px; height: 220px; object-fit: cover; border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .detail-hero-content h2 { font-size: 32px; color: var(--dark); margin: 0 0 15px 0; }
+        .detail-tutor-info { display: flex; align-items: center; gap: 10px; font-size: 16px; color: #555; }
+        .verified-badge { color: var(--primary); font-weight: bold; }
+
+        /* Layout Principal de 2 Columnas */
+        .detail-main-layout {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr; /* Izquierda más ancha, derecha barra lateral */
+            gap: 50px;
+            align-items: start;
+        }
+
+        /* Columna Izquierda: Reseñas y Ratings */
+        .rating-summary-box {
+            background: #EBF6FB; padding: 30px; border-radius: 20px;
+            display: flex; align-items: center; gap: 40px; margin-bottom: 40px;
+        }
+        .rating-big-score { font-size: 48px; font-weight: 800; color: var(--dark); line-height: 1; }
+        .rating-bars { flex-grow: 1; }
+        .rating-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: #777; }
+        .bar-container { flex-grow: 1; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary); border-radius: 4px; }
+
+        .review-card {
+            background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px; border: 1px solid #eee;
+        }
+        .review-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .review-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .review-text { font-size: 14px; color: #555; line-height: 1.6; font-style: italic; }
+
+        /* Columna Derecha: Sidebar de Precio y Booking */
+        .booking-sidebar {
+            background: white; padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee;
+            position: sticky; top: 20px; /* Se queda fijo al hacer scroll */
+        }
+        .sidebar-course-img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 25px; }
+        .price-large { font-size: 36px; font-weight: 900; color: var(--dark); text-align: center; margin-bottom: 25px; display: block;}
+        .benefits-list { list-style: none; padding: 0; margin: 30px 0; }
+        .benefits-list li {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 15px;
+            font-size: 14px; color: #555;
+        }
+        .benefits-list li i { color: var(--primary); font-size: 18px; }
+
+        /* Sección Inferior: Material Extra (Tarjetas Oscuras) */
+        .extra-material-section { margin-top: 60px; padding-top: 40px; border-top: 1px solid #eee; }
+        .material-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        .material-card-dark {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); /* Fondo oscuro gradiente */
+            color: white; padding: 25px; border-radius: 16px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.3s;
+        }
+        .material-card-dark:hover { transform: translateY(-5px); }
+        .material-type-badge {
+            background: #e53e3e; /* Rojo para PDF/Simulador */
+            color: white; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold;
+            display: inline-block; margin-bottom: 15px;
+        }
+        .material-card-dark h4 { margin: 0 0 10px 0; font-size: 18px; }
+        .material-card-dark p { font-size: 13px; color: #ccc; line-height: 1.4; }
+        /* Icono de fondo sutil */
+        .material-card-dark::after {
+            content: '📄'; position: absolute; bottom: -20px; right: -20px; font-size: 100px; opacity: 0.1;
+        }
+        .material-card-dark.sim::after { content: '🎮'; }
+        /* --- ESTILOS PANTALLA CHECKOUT --- */
+        #checkout-screen {
+            display: none;
+            width: 100%; max-width: 1100px; min-height: 100vh; 
+            padding: 40px 20px; margin: 0 auto; box-sizing: border-box;
+        }
+
+        .checkout-layout {
+            display: flex; gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* Columna Izquierda: Formulario */
+        .checkout-form-container {
+            flex: 1.5;
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .payment-methods { display: flex; gap: 15px; margin-bottom: 30px; }
+        .pay-card {
+            border: 1px solid #eee; border-radius: 8px; padding: 10px; width: 60px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pay-card.active { border: 2px solid var(--primary); background-color: #E0F2F1; }
+        .pay-card img { max-width: 100%; max-height: 100%; }
+
+        .form-row { display: flex; gap: 20px; }
+        .form-group { margin-bottom: 20px; flex: 1; }
+        .form-group label { font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        /* Columna Derecha: Resumen */
+        .checkout-summary {
+            flex: 1;
+            background: #EBF6FB; /* Fondo azulito igual que tu imagen */
+            padding: 30px; border-radius: 20px;
+        }
+
+        .summary-item {
+            display: flex; gap: 15px; margin-bottom: 20px; padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .summary-img { width: 80px; height: 60px; border-radius: 10px; object-fit: cover; }
+        
+        /* CONTROL DE HORAS (Botones + -) */
+        .hours-control {
+            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+            background: white; padding: 5px; border-radius: 8px; width: fit-content;
+        }
+        .btn-qty {
+            width: 25px; height: 25px; background: var(--primary); color: white;
+            border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-qty:hover { background: var(--primary-hover); }
+        .hours-display { font-weight: bold; font-size: 14px; color: #333; width: 20px; text-align: center;}
+
+        /* Filas de precios */
+        .price-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #555; }
+        .price-row.total {
+            font-size: 18px; font-weight: 800; color: #333; margin-top: 20px; padding-top: 15px;
+            border-top: 2px solid rgba(0,0,0,0.1);
+        }
+
+/* --- ESTILOS MEETING V2 (ESTILO ZOOM) --- */
+        
+        /* 1. Barra Superior */
+        .meet-topbar {
+            height: 60px; background-color: #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: white;
+        }
+        .meet-back-btn {
+            background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer;
+        }
+        .meet-info { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .meet-live-badge { background: #ff4444; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+
+        /* 2. Layout Principal (Grid) */
+        .meet-body {
+            display: flex; height: calc(100vh - 60px); /* Resto de la pantalla */
+        }
+
+        /* 3. Escenario de Video */
+        .meet-video-stage {
+            flex: 1; /* Toma todo el espacio disponible */
+            background-color: #121212;
+            position: relative; /* Para posicionar cosas encima */
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+
+        /* Video Tutor (Ocupa casi todo) */
+        .video-tutor {
+            width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            border-radius: 15px; position: relative;
+        }
+        .nametag {
+            position: absolute; bottom: 15px; left: 15px;
+            background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px;
+        }
+
+        /* Video Estudiante (PiP) */
+        .video-student {
+            position: absolute; bottom: 100px; right: 30px; /* Flotando esquina derecha */
+            width: 180px; height: 120px;
+            border-radius: 10px; border: 2px solid #333; overflow: hidden;
+            background: black; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .video-student img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Barra de Controles */
+        .meet-controls {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px;
+            background: rgba(30,30,30,0.9); padding: 10px 20px; border-radius: 10px;
+        }
+        .control-icon {
+            width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 20px;
+            background: #444; color: white; cursor: pointer; transition: 0.2s;
+        }
+        .control-icon:hover { background: #666; }
+        .control-icon.hangup { background: #ff4444; width: 60px; border-radius: 30px; }
+
+        /* 4. Barra Lateral (Chat) */
+        .meet-sidebar {
+            width: 350px; /* Ancho fijo */
+            background: white;
+            display: flex; flex-direction: column;
+            border-left: 1px solid #333;
+        }
+        .card, .stat-card, .req-card, .sapiens-card {
+            background-color: #FFFFFF; /* Asegura que sea blanco puro */
+            
+            /* Esta es la clave: Sombra difuminada estilo Apple/Stripe */
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 
+                        0 8px 10px -6px rgba(0, 0, 0, 0.01);
+                        
+            /* Un borde casi invisible para definición extra */
+            border: 1px solid rgba(0,0,0,0.02); 
+        }
+
+        /* CANDADO DE SEGURIDAD */
+        .sidebar-tabs { display: flex; border-bottom: 1px solid #eee; }
+        .tab { flex: 1; text-align: center; padding: 15px; font-size: 14px; color: #666; cursor: pointer; }
+        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); font-weight: bold; }
+
+        .chat-stream { flex: 1; padding: 20px; overflow-y: auto; background: #f9f9f9; }
+        .chat-msg { margin-bottom: 15px; font-size: 13px; padding: 10px; border-radius: 8px; }
+        .chat-msg.tutor { background: #fff; border: 1px solid #eee; }
+        .chat-msg.student { background: #E3F2FD; text-align: right; }
+        .chat-msg.system { text-align: center; color: #888; font-size: 11px; }
+
+        .chat-input-box { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-input-box input { margin: 0; border-radius: 20px; border: 1px solid #ddd; }
+        .chat-input-box button { width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; margin: 0; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div id="mentor-validation-screen" style="display: none; position: fixed; inset: 0; background: #F7F9FC; z-index: 9999; justify-content: center; align-items: center; overflow-y: auto;">
+        <div class="sapiens-card" style="width: 600px; max-width: 90%; padding: 40px; margin: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 50px; margin-bottom: 10px;">🎓</div>
+                <h2 style="color: var(--dark); margin: 0;">Verifica tu Perfil</h2>
+                <p style="color: #666; margin-top: 10px;">Paso requerido para nuevos Mentores.</p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px;">Universidad</label>
+                <select style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                    <option>ESPOL</option>
+                    <option>Universidad de Guayaquil</option>
+                    <option>UCSG</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px;">Historial Académico (PDF)</label>
+                <div style="border: 2px dashed #4FBDBA; background: #E0F2F1; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer;" onclick="alert('Archivo cargado: historial.pdf')">
+                    <span style="font-size: 24px;">📂</span>
+                    <div style="font-size: 12px; color: var(--primary); font-weight: bold;">Clic para subir evidencia</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px;">Materias a dictar</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Cálculo</span>
+                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Física</span>
+                    <span style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;" onclick="this.style.backgroundColor='#4FBDBA'; this.style.color='white'">Python</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="finalizarValidacionMentor()">
+                Enviar y Acceder al Panel
+            </button>
+        </div>
+    </div>
+
+    <div id="validation-timer" style="position: fixed; top: 0; left: 0; width: 100%; background: #2D3748; color: white; text-align: center; font-size: 12px; padding: 5px; z-index: 9999; display: none;">
+        ⏱️ Tiempo: <span id="time-count" style="font-weight: bold; color: #4FBDBA;">0s</span> | Meta: < 90s
+    </div>
+    <div id="role-screen">
+        <div class="role-header">
+            <h1>¿Qué rol quieres tener?</h1>
+            <div class="roles-container">
+                <div class="role-card" onclick="seleccionarRol('Mentor')">
+                    <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=400&q=80" alt="Mentor" class="role-img">
+                    <div style="font-weight: bold;">MENTOR</div>
+                </div>
+                <div class="role-card" onclick="seleccionarRol('Estudiante')">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=80" alt="Estudiante" class="role-img">
+                    <div style="font-weight: bold;">ESTUDIANTE</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-screen">
+        <div class="auth-left">
+            <h2>Aprende a tu ritmo</h2>
+        </div>
+        <div class="auth-right">
+            <span class="back-btn" onclick="volverARoles()">← Volver</span>
+            <div class="login-title">Bienvenido a Sapiens</div>
+            <div class="toggle-container">
+                <button id="btn-tab-login" class="toggle-btn active" onclick="switchTab('login')">Ingresar</button>
+                <button id="btn-tab-register" class="toggle-btn" onclick="switchTab('register')">Register</button>
+            </div>
+            <p class="subtitle">Tu tutor ideal está a un clic de distancia.</p>
+            <div id="form-login">
+                <label>Correo Electrónico</label>
+                <input type="email" id="login-email" placeholder="ejemplo@correo.com">
+                <label>Contraseña</label>
+                <input type="password" id="login-pass" placeholder="Ingrese su contraseña">
+                <div class="extra-options">
+                    <label><input type="checkbox"> Recuérdame</label>
+                    <span style="cursor: pointer;">¿Olvidaste tu contraseña?</span>
+                </div>
+                <button class="btn-primary" onclick="iniciarSesionBtn()">
+    Login
+</button>
+            </div>
+            <div id="form-register" class="hidden">
+                <label>Correo electrónico</label>
+                <input type="email" id="reg-email" placeholder="Ingrese tu Correo electrónico">
+                <label>Nombre de Usuario</label>
+                <input type="text" id="reg-user" placeholder="Ingrese su Nombre de Usuario">
+                <label>Contraseña</label>
+                <input type="password" id="reg-pass" placeholder="Ingrese su contraseña">
+                <button class="btn-primary" onclick="registrarUsuario()">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <div id="screen-mentor-dashboard" style="display: none;">
+        <div class="mentor-container">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div>
+                    <h2 style="color: #2d3748; font-weight: 800; font-size: 26px; margin: 0;">Panel de Control</h2>
+                    <p style="color: #718096; margin: 5px 0 0 0; font-size: 14px;">Bienvenido de vuelta, <strong id="mentor-dash-name">Frank</strong> 👋</p>
+                </div>
+
+
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    
+                    <button onclick="cerrarSesion()" style="background: #FFEBEE; color: #D32F2F; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        Salir ⏻
+                    </button>
+
+                    <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px 5px 5px; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" 
+                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        <span style="font-size: 13px; font-weight: 600; color: #2d3748;">En línea</span>
+                        <div style="width: 10px; height: 10px; background: #27AE60; border-radius: 50%;"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="stats-row">
+                <div class="sapiens-card card-earnings">
+                    <div class="stat-title">
+                        <span>💰 Tu Billetera</span>
+                    </div>
+                    <div class="stat-number">$120.00</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="trend-up">↗ 15%</span>
+                        <span class="stat-sub" style="color: #A0AEC0;">vs mes pasado</span>
+                    </div>
+                </div>
+                
+                <div class="sapiens-card card-rating">
+                    <div class="stat-title">
+                        <span>⭐ Reputación</span>
+                    </div>
+                    <div class="stat-number">4.9</div>
+                    <div class="stat-sub" style="color: #718096;">"Tutor Oro" - 32 reseñas</div>
+                </div>
+
+                <div class="sapiens-card card-next">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div class="stat-title" style="color: var(--primary);">🔴 En 15 minutos</div>
+                            <h3 style="margin: 10px 0 5px 0; font-size: 18px; color: #2d3748;">Cálculo 1: Derivadas</h3>
+                            <p style="margin: 0; font-size: 14px; color: #718096;">Alumno: <strong>Keba</strong></p>
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); font-size: 24px;">📹</div>
+                    </div>
+                    
+                    <button onclick="iniciarSalaMentor()" class="btn-primary" style="width: 100%; margin-top: 20px; box-shadow: 0 4px 15px rgba(79, 189, 186, 0.3);">
+                        Iniciar Sala ahora
+                    </button>
+                </div>
+            </div>
+
+            <div id="mentor-meeting-embedded" style="display: none; height: 80vh; background: #1a1a1a; border-radius: 20px; overflow: hidden; flex-direction: column; margin-top: 20px;">
+                <div style="padding: 15px 20px; background: #222; color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="background: #E53E3E; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">EN VIVO</span>
+                        <span>Tutoría con Keba</span>
+                    </div>
+                    <button onclick="salirDeLaSala()" style="background: #E53E3E; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                        Finalizar y Cobrar 📞
+                    </button>
+                </div>
+
+                <div style="flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: black;">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+                    <div style="position: absolute; bottom: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">Tú (Mentor)</div>
+                    <div style="position: absolute; bottom: 20px; right: 20px; width: 200px; height: 150px; background: #333; border-radius: 10px; overflow: hidden; border: 2px solid #555; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+
+                <div style="padding: 20px; background: #222; display: flex; justify-content: center; gap: 20px;">
+                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">🎤</button>
+                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">📹</button>
+                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">🖥️</button>
+                    <button class="control-icon" style="background:#333; color: white; width: 50px; height: 50px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer;">💬</button>
+                </div>
+            </div>
+            
+            <div id="mentor-post-meeting-embedded" style="display: none; min-height: 70vh; background: white; border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); margin: 20px auto; max-width: 600px;">
+                <div style="text-align: center; max-width: 500px;">
+                    <div style="background: #E8F5E9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                        <span style="font-size: 40px;">💰</span>
+                    </div>
+                    
+                    <h2 style="color: #2D3748; margin: 0 0 10px 0;">¡Sesión Finalizada!</h2>
+                    <p style="color: #718096; margin-bottom: 30px; font-size: 14px;">El pago por las horas impartidas se ha acreditado a tu billetera.</p>
+                    
+                    <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 30px;">
+                    
+                    <div style="text-align: left; background: #F7FAFC; padding: 25px; border-radius: 15px; border: 1px solid #EDF2F7;">
+                        <h4 style="margin: 0 0 5px 0; color: #2D3748; font-size: 16px;">Genera Ingresos Pasivos 📈</h4>
+                        <p style="font-size: 12px; color: #718096; margin-bottom: 20px;">Sube los apuntes de esta clase para venderlos.</p>
+                        
+                        <div style="border: 2px dashed #CBD5E0; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: white; transition: 0.2s; margin-bottom: 20px;" onclick="alert('PDF cargado: Apuntes_Clase.pdf')">
+                            <div style="font-size: 24px; margin-bottom: 5px;">☁️</div>
+                            <div style="font-weight: bold; font-size: 13px; color: #4A5568;">Clic para subir PDF</div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label style="font-weight: bold; font-size: 13px; color: #2D3748;">Precio de venta:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="color: #718096;">$</span>
+                                <input type="number" value="2.50" style="width: 80px; padding: 8px; border: 1px solid #CBD5E0; border-radius: 8px; font-weight: bold; text-align: center; margin: 0;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary" style="width: 100%; justify-content: center; margin-top: 30px; padding: 15px;" onclick="finalizarMentorFlow()">
+                        Publicar Material y Volver al Panel
+                    </button>
+                    
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 12px; color: #999; cursor: pointer; text-decoration: underline;" onclick="finalizarMentorFlow()">Omitir y volver al inicio</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sapiens-card" style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 18px; color: var(--dark);">📅 Mi Disponibilidad Semanal</h3>
+                    <span style="font-size: 12px; color: #666;">Configura tus bloques libres</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; text-align: center;">
+                    
+                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">LUN</div>
+                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">MAR</div>
+                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">MIE</div>
+                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">JUE</div>
+                    <div style="font-weight: bold; font-size: 12px; color: #aaa;">VIE</div>
+
+                    <div class="time-slot busy">09:00</div>
+                    <div class="time-slot available">09:00</div>
+                    <div class="time-slot busy">09:00</div>
+                    <div class="time-slot available">09:00</div>
+                    <div class="time-slot available">09:00</div>
+
+                    <div class="time-slot available">15:00</div>
+                    <div class="time-slot available">15:00</div>
+                    <div class="time-slot busy">15:00</div>
+                    <div class="time-slot available">15:00</div>
+                    <div class="time-slot busy">15:00</div>
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 12px; color: #666;">
+                    <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 10px; height: 10px; background: #E0F2F1; border: 1px solid var(--primary); border-radius: 2px;"></div> Libre</div>
+                    <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 10px; height: 10px; background: #eee; border-radius: 2px;"></div> Ocupado</div>
+                </div>
+            </div>
+
+            <div class="dashboard-lower-grid">
+                
+                <div>
+                    <h3 style="font-size: 18px; color: #2d3748; margin-bottom: 25px;">Solicitudes Pendientes <span style="background: #E53E3E; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;">3</span></h3>
+                    
+                    <div id="request-list">
+                        <div class="req-card" id="req-1">
+                            <div class="req-left">
+                                <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80" class="req-img">
+                                <div class="req-details">
+                                    <h4>Lina (Sistemas)</h4>
+                                    <div style="display:flex; gap: 8px; margin-bottom: 4px;">
+                                        <span class="req-tag">Python</span>
+                                        <span class="req-tag">Pandas</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #718096;">📅 Hoy, 4:00 PM • 2 horas</div>
+                                </div>
+                            </div>
+                            <div class="req-buttons">
+                                <button class="btn-icon btn-no" onclick="ocultarSolicitud('req-1')">✕</button>
+                                <button class="btn-icon btn-yes" onclick="aceptarSolicitudAnimada('req-1')">✓</button>
+                            </div>
+                        </div>
+
+                        <div class="req-card" id="req-2">
+                            <div class="req-left">
+                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" class="req-img">
+                                <div class="req-details">
+                                    <h4>Juan (Mecatrónica)</h4>
+                                    <div style="display:flex; gap: 8px; margin-bottom: 4px;">
+                                        <span class="req-tag">Física</span>
+                                        <span class="req-tag">Vectores</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #718096;">📅 Mañana, 10:00 AM • 1 hora</div>
+                                </div>
+                            </div>
+                            <div class="req-buttons">
+                                <button class="btn-icon btn-no" onclick="ocultarSolicitud('req-2')">✕</button>
+                                <button class="btn-icon btn-yes" onclick="aceptarSolicitudAnimada('req-2')">✓</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sapiens-card" style="margin-top: 20px; border: 2px solid #F2C94C; padding: 20px;">
+                    <h4 style="margin-top: 0; font-size: 14px; color: #D97706;">⚡ Acción Requerida</h4>
+                    <p style="font-size: 12px; color: #666;">Define tu tarifa por hora para aparecer en búsquedas.</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="mentor-rate" placeholder="$ 0.00" style="padding: 8px; width: 80px; margin: 0;">
+                        <button class="btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="validarTarifa()">Guardar</button>
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="sapiens-card" style="padding: 25px; min-height: 400px;">
+                        <h3 style="font-size: 18px; color: #2d3748; margin-top: 0; margin-bottom: 20px;">Mis Guías en Venta</h3>
+                        
+                        <div class="tool-item">
+                            <div class="tool-icon pdf-icon">PDF</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; font-size: 14px; color: #333;">Guía Python Básico</div>
+                                <div style="font-size: 12px; color: #A0AEC0;">35 ventas</div>
+                            </div>
+                            <div style="font-weight: 700; color: #27AE60;">+$87.50</div>
+                        </div>
+
+                        <div class="tool-item">
+                            <div class="tool-icon sim-icon">SIM</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; font-size: 14px; color: #333;">Simulador Cálculo</div>
+                                <div style="font-size: 12px; color: #A0AEC0;">12 ventas</div>
+                            </div>
+                            <div style="font-weight: 700; color: #27AE60;">+$48.00</div>
+                        </div>
+
+                        <div class="tool-item" style="border: none;">
+                            <div class="tool-icon pdf-icon">PDF</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; font-size: 14px; color: #333;">Formulario Física 1</div>
+                                <div style="font-size: 12px; color: #A0AEC0;">8 ventas</div>
+                            </div>
+                            <div style="font-weight: 700; color: #27AE60;">+$20.00</div>
+                        </div>
+
+                        <button class="btn-upload" onclick="alert('Subir archivo...')">
+                            + Subir Nuevo Material
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    
+    <div id="marketplace-screen">
+        
+        <div class="header">
+            <h2 style="color: var(--primary); font-weight: 800; font-size: 28px; margin: 0; cursor: pointer;" onclick="irAlInicio()">SAPIENS</h2>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="background: #FFF8E1; color: #F57F17; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 13px; border: 1px solid #FFE082; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: transform 0.2s;" onclick="alert('💎 SAPIENS REWARDS\n\nGanaste puntos por tu última tutoría.\nAcumula 500 pts para una clase GRATIS.')">
+                    💎 150 pts
+                </div>
+                <button onclick="cerrarSesion()" style="background: #FFEBEE; color: #D32F2F; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            Salir ⏻
+                </button>
+
+                <div style="text-align: right;">
+                    <span style="display: block; font-weight: bold; font-size: 16px; color: #333;">Hola, <span id="display-name">Usuario</span></span>
+                    <span style="display: block; font-size: 13px; color: var(--primary); font-weight: bold;">ESTUDIANTE</span>
+                </div>
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary);">
+            </div>
+        </div>
+
+        <div id="default-feed">
+            
+            <div class="section-container">
+                <h3>Bienvenido de vuelta, ¿Listo para ver tus clases grabadas?</h3>
+                <div class="grid card-container">
+                    <div class="card course-card searchable">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80" alt="Calculo">
+                        <h4 class="search-target">Curso Completo: Cálculo 1 - Desde Cero</h4>
+                        <div class="tutor-mini">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Frank">
+                            <span>Frank Vera</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <div style="background: #eee; height: 6px; border-radius: 3px; width: 100%;">
+                                <div style="background: var(--primary); height: 6px; border-radius: 3px; width: 70%;"></div>
+                            </div>
+                            <div style="text-align: right; font-size: 11px; color: #999; margin-top: 5px;">Módulos: 5 de 7</div>
+                        </div>
+                    </div>
+    
+                    <div class="card course-card searchable">
+                        <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80" alt="Python">
+                        <h4 class="search-target">Fundamentos de Python para Ingenieros</h4>
+                        <div class="tutor-mini">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80" alt="Ana">
+                            <span>Ana Reyes</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <div style="background: #eee; height: 6px; border-radius: 3px; width: 100%;">
+                                <div style="background: var(--primary); height: 6px; border-radius: 3px; width: 40%;"></div>
+                            </div>
+                            <div style="text-align: right; font-size: 11px; color: #999; margin-top: 5px;">Módulos: 2 de 5</div>
+                        </div>
+                    </div>
+    
+                    <div class="card course-card searchable">
+                        <img src="https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=600&q=80" alt="Fisica">
+                        <h4 class="search-target">Preparación Intensiva: Examen de Física</h4>
+                        <div class="tutor-mini">
+                            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="Sofia">
+                            <span>Sofía Mora</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <div style="background: #eee; height: 6px; border-radius: 3px; width: 100%;">
+                                <div style="background: var(--primary); height: 6px; border-radius: 3px; width: 90%;"></div>
+                            </div>
+                            <div style="text-align: right; font-size: 11px; color: #999; margin-top: 5px;">Módulos: 9 de 10</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="section-container" style="margin-top: 60px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Recomendados para ti</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="search-input" placeholder="Busca por materia (ej. Python)..." style="margin: 0; padding: 10px; width: 250px; border-radius: 8px; border: 1px solid #ddd;">
+                        <button onclick="realizarBusqueda()" style="width: auto; padding: 0 20px; border-radius: 8px; background: var(--primary); color: white; border: none; cursor: pointer;">Search</button>
+                    </div>
+                </div>
+    
+                <div class="grid card-container">
+                    <div class="tutor-card searchable" style="cursor: pointer;" onclick="verDetalles(1)">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80" alt="Calculo" class="main-img">
+                        <div class="stars">★★★★★</div>
+                        <h4 class="search-target">Tutoría Cálculo 1: Límite y Derivadas</h4>
+                        <p class="desc">¿Listo para tu examen? Refuerzo intensivo en límites, derivadas e integrales.</p>
+                        <div class="tutor-row">
+                            <div class="tutor-info">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" class="tutor-avatar" alt="Luis">
+                                <span class="tutor-name">Luis Medina</span>
+                            </div>
+                            <div class="price-tag"><span class="price-old">$8</span> $4</div>
+                        </div>
+                    </div>
+
+                    <div class="tutor-card searchable" style="cursor: pointer;" onclick="verDetalles(2)">
+                        <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80" alt="Python" class="main-img">
+                        <div class="stars">★★★★☆</div>
+                        <h4 class="search-target">Refuerzo Python: Fundamentos</h4>
+                        <p class="desc">Aprende a programar en Python desde cero. Te ayudo con tus deberes.</p>
+                        <div class="tutor-row">
+                            <div class="tutor-info">
+                                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80" class="tutor-avatar" alt="Maria">
+                                <span class="tutor-name">Maria Pérez</span>
+                            </div>
+                            <div class="price-tag"><span class="price-old">$7</span> $5</div>
+                        </div>
+                    </div>
+
+                    <div class="tutor-card searchable" style="cursor: pointer;" onclick="verDetalles(3)">
+                        <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80" alt="Fisica" class="main-img">
+                        <div class="stars">★★★★★</div>
+                        <h4 class="search-target">Ayudantía: Física General I</h4>
+                        <p class="desc">Como Ayudante de Cátedra, te explico DCL, vectores y estática de forma fácil.</p>
+                        <div class="tutor-row">
+                            <div class="tutor-info">
+                                <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=100&q=80" class="tutor-avatar" alt="Marcos">
+                                <span class="tutor-name">Marcos Medina</span>
+                            </div>
+                            <div class="price-tag"><span class="price-old">$10</span> $5</div>
+                        </div>
+                    </div>
+
+                    <div class="tutor-card searchable" style="cursor: pointer;" onclick="verDetalles(4)">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Estadistica" class="main-img">
+                        <div class="stars">★★★★☆</div>
+                        <h4 class="search-target">Preparación Examen: Estadística</h4>
+                        <p class="desc">¿Examen final a la vista? Repaso completo de distribuciones y probabilidad.</p>
+                        <div class="tutor-row">
+                            <div class="tutor-info">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" class="tutor-avatar" alt="Patricia">
+                                <span class="tutor-name">Patricia Núñez</span>
+                            </div>
+                            <div class="price-tag"><span class="price-old">$9</span> $6</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="section-container" style="margin-top: 60px; padding-bottom: 80px;">
+                <h3 style="font-size: 22px; margin-bottom: 25px;">Banco de Guías y Simuladores</h3>
+                
+                <div class="grid card-container">
+                    <div class="tool-card" style="border: 2px solid #6C63FF; background: #F3F0FF; cursor: pointer;" onclick="abrirSimuladorIA()">
+                        <div style="height: 140px; display: flex; align-items: center; justify-content: center; background: #6C63FF; border-radius: 10px; margin-bottom: 15px;">
+                            <span style="font-size: 50px;">🧠</span>
+                        </div>
+                        <span class="tool-tag" style="color: #6C63FF;">NUEVO • IA BETA</span>
+                        <h4 style="color: #4A4A4A;">Diagnóstico Inteligente</h4>
+                        <p class="desc">¿No sabes qué estudiar? La IA te hará un examen rápido para detectar tus fallas.</p>
+                        <button class="btn-primary" style="background: #6C63FF; margin-top: auto;">Empezar Test</button>
+                    </div>
+
+                    <div class="tool-card searchable">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80" alt="Calculo">
+                        <span class="tool-tag">Simulador de Cálculo</span>
+                        <h4 class="search-target">Simulador: Examen 1 de Cálculo</h4>
+                        <p class="desc">Pon a prueba tus conocimientos en límites y derivadas. 25 preguntas de opción múltiple.</p>
+                        <button class="btn-tool" onclick="alert('Iniciando simulador...')">Empezar Simulador</button>
+                    </div>
+    
+                    <div class="tool-card searchable">
+                        <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80" alt="Python">
+                        <span class="tool-tag">Guía de Python</span>
+                        <h4 class="search-target">Guía Rápida: Comandos de Python</h4>
+                        <p class="desc">Un PDF de 2 páginas con los comandos esenciales, bucles, listas y funciones básicas.</p>
+                        <button class="btn-tool secondary" onclick="alert('Descargando PDF...')">Descargar PDF 📥</button>
+                    </div>
+    
+                    <div class="tool-card searchable">
+                        <img src="https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=600&q=80" alt="Fisica">
+                        <span class="tool-tag">Simulador de Física</span>
+                        <h4 class="search-target">Simulador: Vectores y Estática</h4>
+                        <p class="desc">Resuelve 10 problemas interactivos de física para dominar los diagramas de cuerpo libre.</p>
+                        <button class="btn-tool" onclick="alert('Iniciando simulador...')">Empezar Simulador</button>
+                    </div>
+    
+                    <div class="tool-card searchable">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Estadistica">
+                        <span class="tool-tag">Guía de Estadística</span>
+                        <h4 class="search-target">Resumen: Pruebas de Hipótesis</h4>
+                        <p class="desc">Una guía paso a paso para entender y aplicar pruebas T y Chi-cuadrado en tus proyectos.</p>
+                        <button class="btn-tool secondary" onclick="alert('Descargando PDF...')">Descargar PDF 📥</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="search-results-view">
+            <button class="btn-back" onclick="volverAlFeed()" style="margin-bottom: 20px;">← Volver al inicio</button>
+            
+            <div class="search-hero">
+                <div class="search-content">
+                    <div class="search-bar-big">
+                        <input type="text" id="search-input-big" placeholder="Busca por materia, tema o nombre del tutor">
+                        <button onclick="realizarBusquedaBig()">Search</button>
+                    </div>
+                    <div class="filters-row">
+                        <select class="filter-select"><option>Materia</option><option>Cálculo</option><option>Física</option></select>
+                        <select class="filter-select"><option>Modalidad</option><option>Virtual</option><option>Presencial</option></select>
+                        <select class="filter-select"><option>Perfil</option><option>Verificado</option></select>
+                        <select class="filter-select"><option>Precio</option><option>$-$$</option></select>
+                        <select class="filter-select"><option>Disponibilidad</option><option>Hoy</option></select>
+                        <select class="filter-select"><option>Calificación</option><option>5 Estrellas</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="section-title">Tutorías y Cursos para: <span id="search-term-display" style="color: var(--primary);">...</span></h3>
+            <div class="grid" id="search-results-grid">
+                </div>
+
+            <h3 class="section-title">Mentores especializados en este tema</h3>
+            <div class="grid" id="mentors-results-grid">
+                </div>
+
+            <div id="no-results" style="text-align: center; padding: 50px; display: none;">
+                <p style="font-size: 18px; color: #666;">No encontramos coincidencias 😔</p>
+                <button class="btn-primary" style="width: auto; padding: 10px 30px;" onclick="volverAlFeed()">Ver todo</button>
+            </div>
+        </div>
+        <div id="course-details-view">
+            <button class="btn-back" onclick="volverAResultados()" style="margin-bottom: 30px;">← Volver a resultados</button>
+
+            <div class="detail-hero">
+                <img src="" id="detail-tutor-img" alt="Tutor" class="detail-hero-img">
+                <div class="detail-hero-content">
+                    <h2 id="detail-title">Título del Curso Aquí</h2>
+                    <div class="detail-tutor-info">
+                        <img src="" id="detail-tutor-avatar-small" style="width: 30px; height: 30px; border-radius: 50%;">
+                        <span>Impartido por: <strong id="detail-tutor-name">Nombre Tutor</strong> (<span class="verified-badge">Tutor Verificado ✓</span>) | <span id="detail-student-role">Estudiante de Software</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-main-layout">
+                <div class="left-column">
+                    <div class="rating-summary-box">
+                        <div style="text-align: center;">
+                            <span class="rating-big-score">5.0</span>
+                            <div class="stars" style="font-size: 18px;">★★★★★</div>
+                            <span style="font-size: 12px; color: #777;">Top Rating</span>
+                        </div>
+                        <div class="rating-bars">
+                            <div class="rating-bar-row"><span>5 Stars</span><div class="bar-container"><div class="bar-fill" style="width: 100%;"></div></div></div>
+                            <div class="rating-bar-row"><span>4 Stars</span><div class="bar-container"><div class="bar-fill" style="width: 15%;"></div></div></div>
+                            <div class="rating-bar-row"><span>3 Stars</span><div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div></div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px;">Lo que dicen los estudiantes</h3>
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" class="review-avatar">
+                            <div><strong>Patricia N. (Estudiante)</strong><br><span class="stars">★★★★★</span></div>
+                        </div>
+                        <p class="review-text">"¡Excelente tutor! Explica súper claro y tiene mucha paciencia. Aprobé el examen gracias a estas tutorías. 100% recomendado."</p>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-header">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" class="review-avatar">
+                            <div><strong>Juan M. (Estudiante)</strong><br><span class="stars">★★★★☆</span></div>
+                        </div>
+                        <p class="review-text">"Muy buena metodología. Se nota que domina el tema y los ejercicios prácticos ayudaron muchísimo a entender la teoría."</p>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <div class="booking-sidebar">
+                        <img src="" id="detail-course-img" class="sidebar-course-img" alt="CursoPortada">
+                        <span class="price-large" id="detail-price">$XX por hora</span>
+                        
+                        <button class="btn-primary" style="width: 100%; padding: 15px; font-size: 18px; margin-bottom: 30px;" onclick="irAlCheckout()">Reservar Tutoría Ahora</button>
+
+                        <h4>¿Qué incluye esta tutoría?</h4>
+                        <ul class="benefits-list">
+                            <li><i>📹</i> Sesión 1-a-1 personalizada en vivo</li>
+                            <li><i>📄</i> Material de estudio exclusivo (PDFs)</li>
+                            <li><i>💬</i> Resolución de dudas por chat</li>
+                            <li><i>🎮</i> Acceso a simuladores relacionados</li>
+                        </ul>
+
+                        <h4>Comparte este curso:</h4>
+                        <div style="display: flex; gap: 15px; color: var(--primary); font-size: 20px; cursor: pointer;">
+                            <span>🐦</span><span>📘</span><span>🔗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="extra-material-section">
+                <h3>Material de estudio incluido</h3>
+                <div class="material-grid">
+                    <div class="material-card-dark">
+                        <span class="material-type-badge">PDF</span>
+                        <h4>Formulario de Conceptos Clave</h4>
+                        <p>Un resumen en PDF con todas las fórmulas y sintaxis esencial que necesitas tener a mano.</p>
+                    </div>
+                    <div class="material-card-dark sim">
+                        <span class="material-type-badge" style="background: #38a169;">SIMULADOR</span>
+                        <h4>Simulador de Ejercicios Prácticos</h4>
+                        <p>Pon a prueba lo aprendido con 20 ejercicios interactivos con retroalimentación inmediata.</p>
+                    </div>
+                     <div class="material-card-dark">
+                        <span class="material-type-badge">PDF</span>
+                        <h4>Guía de Proyectos Reales</h4>
+                        <p>Paso a paso para construir 3 proyectos finales para tu portafolio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="checkout-screen">
+        <button class="btn-back" onclick="volverADetalles()" style="margin-bottom: 20px;">← Volver</button>
+        
+        <div class="header" style="margin-bottom: 20px;">
+            <h2 style="color: var(--dark); font-weight: 800;">SAPIENS Checkout</h2>
+        </div>
+
+        <div class="checkout-layout">
+            <div class="checkout-form-container">
+                <h3>Método de Pago</h3>
+                <div class="payment-methods">
+                    <div class="pay-card active">VISA</div>
+                    <div class="pay-card">MC</div>
+                    <div class="pay-card">Amex</div>
+                    <div class="pay-card">PayPal</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nombre en la tarjeta</label>
+                    <input type="text" placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Número de tarjeta</label>
+                    <input type="text" placeholder="0000 0000 0000 0000">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiración (MM/YY)</label>
+                        <input type="text" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label>CVC</label>
+                        <input type="text" placeholder="123">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 30px; font-size: 13px; color: #666;">
+                    <input type="checkbox" checked style="width: auto; margin-right: 10px;"> Guardar información para futuros pagos
+                </div>
+
+                <button class="btn-primary" style="font-size: 18px;" onclick="confirmarPago()">Confirmar Pago</button>
+            </div>
+
+            <div class="checkout-summary">
+                <h3 style="margin-top: 0;">Resumen</h3>
+                
+                <div class="summary-item">
+                    <img src="" id="checkout-img" class="summary-img">
+                    <div>
+                        <div style="font-weight: bold; font-size: 14px;" id="checkout-title">Tutoría Cálculo 1</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Precio por hora: <span id="checkout-base-price">$5.00</span></div>
+                        
+                        <div class="hours-control">
+                            <button class="btn-qty" onclick="cambiarHoras(-1)">-</button>
+                            <span class="hours-display" id="hours-count">1</span>
+                            <button class="btn-qty" onclick="cambiarHoras(1)">+</button>
+                            <span style="font-size: 12px; margin-left: 5px;">hora(s)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal">$5.00</span>
+                </div>
+                <div class="price-row">
+                    <span>Cuota de Servicio (10%)</span>
+                    <span id="summary-fee">$0.50</span>
+                </div>
+                <div class="price-row">
+                    <span>IVA (15%)</span>
+                    <span id="summary-tax">$0.75</span>
+                </div>
+                <div class="price-row total">
+                    <span>Total</span>
+                    <span id="summary-total" style="color: var(--primary);">$6.25</span>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div id="meeting-screen" class="screen" style="display: none; background-color: #1a1a1a; padding: 0; max-width: 100%;">
+        
+        <div class="meet-topbar">
+            <button class="meet-back-btn" onclick="salirDeLaSala()">← Salir</button>
+            <div class="meet-info">
+                <span class="meet-live-badge">EN VIVO 🔴</span>
+                <span>Tutoría de Cálculo 1</span>
+            </div>
+            <div style="color: white; cursor: pointer;">⚙️</div>
+        </div>
+
+        <div class="meet-body">
+            
+            <div class="meet-video-stage">
+                <div class="video-tutor" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80');">
+                    <div class="nametag">Frank Vera (Tutor)</div>
+                </div>
+
+                <div class="video-student">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80">
+                    <div class="nametag" style="left: auto; right: 10px; bottom: 10px;">Tú</div>
+                </div>
+
+                <div class="meet-controls">
+                    <button class="control-icon">🎤</button>
+                    <button class="control-icon">📹</button>
+                    <button class="control-icon hangup" onclick="salirDeLaSala()">📞</button>
+                    <button class="control-icon">✋</button>
+                    <button class="control-icon">🖥️</button>
+                </div>
+            </div>
+
+            <div class="meet-sidebar">
+                <div class="sidebar-tabs">
+                    <div class="tab active">Chat</div>
+                    <div class="tab">Archivos</div>
+                </div>
+
+                <div class="chat-stream">
+                    <div class="chat-msg tutor"><strong>Frank:</strong> Hola! ¿Listo para empezar?</div>
+                    <div class="chat-msg student"><strong>Tú:</strong> Sí, tengo dudas con derivadas.</div>
+                    <div class="chat-msg system">Frank ha compartido: <a href="#" style="color:var(--primary)">Formulario.pdf</a></div>
+                </div>
+
+                <div class="chat-input-box">
+                    <input type="text" placeholder="Enviar mensaje...">
+                    <button style="background: var(--primary); color: white; border: none;">➤</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- FIN DE MEETING SCREEN -->
+
+    <div id="post-class-screen" style="display: none; min-height: 100vh; background: #F7F9FC; padding: 40px 20px;">
+        <div class="mentor-container" style="max-width: 600px; text-align: center;">
+            <div class="sapiens-card" style="padding: 50px 30px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">🎉</div>
+                <h2 style="color: var(--dark); margin-bottom: 10px;">¡Clase Finalizada!</h2>
+                <p style="color: #666; margin-bottom: 30px;" id="post-class-msg">La sesión ha terminado exitosamente.</p>
+
+                <div id="student-feedback-view" class="hidden">
+                    <h3 style="font-size: 18px;">¿Qué tal estuvo la clase con <span id="rating-tutor-name">Frank</span>?</h3>
+                    <div style="font-size: 40px; color: #ddd; cursor: pointer; margin: 20px 0;" id="star-rating">
+                        <span onclick="rate(1)">★</span><span onclick="rate(2)">★</span><span onclick="rate(3)">★</span><span onclick="rate(4)">★</span><span onclick="rate(5)">★</span>
+                    </div>
+                    <textarea placeholder="Escribe un comentario breve..." style="width: 100%; height: 80px; padding: 10px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 20px; font-family: inherit;"></textarea>
+                    
+                    <div style="background: #E0F2F1; padding: 15px; border-radius: 10px; text-align: left; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                        <div style="background: white; width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 20px;">📄</div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 14px;">Resumen_Clase.pdf</div>
+                            <div style="font-size: 12px; color: var(--primary);">Listo para descargar</div>
+                        </div>
+                        <button style="margin-left: auto; background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Descargar</button>
+                    </div>
+                </div>
+
+                <div id="mentor-upload-view" class="hidden">
+                    <h3 style="font-size: 18px; margin-bottom: 20px;">Sube el material de la clase para finalizar y cobrar</h3>
+                    
+                    <div style="border: 2px dashed #ccc; padding: 30px; border-radius: 15px; background: #fafafa; margin-bottom: 20px; cursor: pointer;" onclick="alert('Simulando subida de archivo...')">
+                        <div style="font-size: 30px; margin-bottom: 10px;">☁️</div>
+                        <p style="margin: 0; font-weight: bold; color: #666;">Arrastra el PDF aquí</p>
+                        <p style="font-size: 12px; color: #999;">o haz clic para buscar</p>
+                    </div>
+
+                    <div style="text-align: left; margin-bottom: 20px;">
+                        <label style="font-size: 13px; font-weight: bold;">Precio del documento (Opcional)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" value="$2.50" style="margin:0; width: 100px;">
+                            <span style="font-size: 12px; color: #999; display: flex; align-items: center;">*Genera ingresos extra cuando lo descarguen</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="finalizarTodo()">Confirmar y Volver al Inicio</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ai-simulator-screen" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="sapiens-card" style="width: 600px; max-width: 90%; padding: 40px; position: relative;">
+            <button onclick="cerrarSimulador()" style="position: absolute; top: 15px; right: 15px; border: none; background: none; font-size: 20px; cursor: pointer;">✕</button>
+
+            <div id="ai-view-config">
+                <h2 style="color: var(--dark); margin-top: 0;">🤖 Sapiens AI Teacher</h2>
+                <p style="color: #666;">Dime qué tema quieres evaluar y generaré un examen corto para medir tu nivel real.</p>
+                
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-top: 20px;">Tema a evaluar</label>
+                <input type="text" id="ai-topic-input" placeholder="Ej: Derivadas, Leyes de Newton, Python..." style="font-size: 16px; padding: 15px;">
+                
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-top: 15px;">Dificultad</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                    <span class="diff-chip selected" onclick="selectDiff(this)">Básico</span>
+                    <span class="diff-chip" onclick="selectDiff(this)">Intermedio</span>
+                    <span class="diff-chip" onclick="selectDiff(this)">Difícil</span>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="iniciarExamenIA()">Generar Examen</button>
+            </div>
+
+            <div id="ai-view-exam" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <span style="font-weight: bold; color: #666;">Pregunta 1 de 3</span>
+                    <span style="color: #E53E3E; font-weight: bold;">⏱️ 00:45</span>
+                </div>
+                
+                <h3 id="ai-question-text" style="font-size: 18px; margin-bottom: 20px;">¿Cuál es la derivada de x²?</h3>
+                
+                <div class="quiz-options">
+                    <div class="quiz-opt" onclick="selectOption(this)">A) 2x</div>
+                    <div class="quiz-opt" onclick="selectOption(this)">B) x</div>
+                    <div class="quiz-opt" onclick="selectOption(this)">C) 2x²</div>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; justify-content: center; margin-top: 20px;" onclick="finalizarExamenIA()">Enviar Respuestas</button>
+            </div>
+
+            <div id="ai-view-result" class="hidden" style="text-align: center;">
+                <div style="font-size: 60px; margin-bottom: 10px;">📉</div>
+                <h2 style="color: #E53E3E; margin: 0;">Nota: 4.5/10</h2>
+                <p style="color: #666;">Hemos detectado vacíos importantes en <strong id="ai-result-topic">...</strong></p>
+                
+                <div style="background: #F7FAFC; padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
+                    <h4 style="margin: 0 0 10px 0;">Recomendación Sapiens:</h4>
+                    <div class="tutor-mini" style="margin: 0;">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <div style="font-weight: bold;">Frank Vera</div>
+                            <div style="font-size: 11px;">Experto en este tema • $5/h</div>
+                        </div>
+                        <button class="btn-primary" style="padding: 5px 15px; font-size: 12px; margin-left: auto;">Agendar</button>
+                    </div>
+                </div>
+                
+                <button class="btn-outline" style="width: 100%; justify-content: center;" onclick="cerrarSimulador()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* Estilos del Quiz */
+    .diff-chip { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 12px; }
+    .diff-chip.selected { background: #6C63FF; color: white; border-color: #6C63FF; }
+    .quiz-opt { padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+    .quiz-opt:hover, .quiz-opt.selected { background: #F3F0FF; border-color: #6C63FF; font-weight: bold; }
+    </style>
+
+    <script>
+        let rolSeleccionado = "";
+// Datos "ficticios" de los mentores para la búsqueda
+// Datos "ficticios" AMPLIADOS para que siempre salgan 3 resultados
+        const mentoresData = [
+            // MENTORES DE PYTHON (Para que salgan 3 al buscar 'python')
+            { name: "Mateo Zambrano", role: "Experto Python", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80", tags: "python programacion codigo" },
+            { name: "Ana Reyes", role: "Ingeniera de Software", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80", tags: "python backend django" },
+            { name: "Carlos Ruiz", role: "Data Scientist", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80", tags: "python datos pandas" },
+
+            // OTROS MENTORES
+            { name: "Isabella Paz", role: "Ayudante Cálculo 1", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80", tags: "calculo matematicas derivadas" },
+            { name: "Sofía Mora", role: "Tutora Física 2", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80", tags: "fisica vectores estatica" },
+            { name: "Jorge Lindao", role: "Diseño Gráfico", img: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=400&q=80", tags: "diseño arte" },
+            { name: "Camila Vera", role: "POO y Java", img: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&w=400&q=80", tags: "programacion java objetos" }
+        ];
+
+// --- DATOS DE LOS CURSOS/TUTORÍAS ---
+// --- DATOS DE LOS CURSOS/TUTORÍAS (BASE DE DATOS ACTUALIZADA) ---
+        const cursoDetalleData = {
+            // ID 1: CÁLCULO (Coincide con tarjeta 1 de Recomendados)
+            1: { 
+                title: "Tutoría Cálculo 1: Límite y Derivadas", 
+                tutorName: "Luis Medina", 
+                tutorRole: "Ayudante de Cátedra", 
+                courseImg: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80", 
+                price: "$4 por hora" 
+            },
+            // ID 2: PYTHON FUNDAMENTOS (Coincide con tarjeta 2 de Recomendados y 1 de Búsqueda)
+            2: { 
+                title: "Refuerzo Python: Fundamentos", 
+                tutorName: "Maria Pérez", 
+                tutorRole: "Ingeniera de Software", 
+                courseImg: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80", 
+                price: "$5 por hora" 
+            },
+            // ID 3: FÍSICA (Coincide con tarjeta 3 de Recomendados)
+            3: { 
+                title: "Ayudantía: Física General I", 
+                tutorName: "Marcos Medina", 
+                tutorRole: "Tutor de Física", 
+                courseImg: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=400&q=80", 
+                price: "$5 por hora" 
+            },
+            // ID 4: ESTADÍSTICA (Coincide con tarjeta 4 de Recomendados)
+            4: { 
+                title: "Preparación Examen: Estadística", 
+                tutorName: "Patricia Núñez", 
+                tutorRole: "Estudiante de Economía", 
+                courseImg: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80", 
+                price: "$6 por hora" 
+            },
+            // ID 5: PYTHON DATA SCIENCE (Para la búsqueda)
+            5: { 
+                title: "Python para Data Science", 
+                tutorName: "Carlos Ruiz", 
+                tutorRole: "Data Scientist", 
+                courseImg: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80", 
+                price: "$8 por hora" 
+            },
+            // ID 6: SCRIPTS (Para la búsqueda)
+            6: { 
+                title: "Scripts y Automatización", 
+                tutorName: "David Reyes", 
+                tutorRole: "DevOps Engineer", 
+                courseImg: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80", 
+                tutorImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80", 
+                price: "$6 por hora" 
+            }
+        };
+        function seleccionarRol(rol) {
+            rolSeleccionado = rol;
+            document.getElementById('role-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex'; 
+        }
+
+        function volverARoles() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('role-screen').style.display = 'block';
+            switchTab('login');
+        }
+
+        function switchTab(tab) {
+            const btnLogin = document.getElementById('btn-tab-login');
+            const btnRegister = document.getElementById('btn-tab-register');
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
+
+            if (tab === 'login') {
+                btnLogin.classList.add('active');
+                btnRegister.classList.remove('active');
+                formLogin.style.display = 'block';
+                formRegister.style.display = 'none';
+            } else {
+                btnRegister.classList.add('active');
+                btnLogin.classList.remove('active');
+                formRegister.style.display = 'block';
+                formLogin.style.display = 'none';
+            }
+        }
+
+        function registrarUsuario() {
+            const user = document.getElementById('reg-user').value;
+            const email = document.getElementById('reg-email').value;
+            if (user === "" || email === "") { alert("Por favor, completa los datos."); return; }
+            alert("¡Cuenta creada con éxito! Bienvenido a Sapiens.");
+            entrarAlMarketplace(user);
+        }
+
+// --- FUNCIÓN MODIFICADA PARA MENTOR Y ESTUDIANTE (LIMPIA) ---
+        function entrarAlMarketplace(nombreUsuario) {
+            // 1. Ocultar login
+            document.getElementById('auth-screen').style.display = 'none';
+            
+            // 2. Ajustes visuales del body
+            document.body.style.display = 'block';
+            document.body.style.justifyContent = 'unset';
+            document.body.style.alignItems = 'unset';
+
+            // 3. DECISIÓN DE ROL
+            if (rolSeleccionado === 'Mentor') {
+                // --- CAMINO DEL MENTOR ---
+                // Ocultamos el marketplace de estudiante por seguridad
+                document.getElementById('marketplace-screen').style.display = 'none';
+                
+                // Mostrar Dashboard de Mentor
+                const dashboardMentor = document.getElementById('screen-mentor-dashboard');
+                if (dashboardMentor) {
+                    dashboardMentor.style.display = 'block';
+                    // Actualizar el nombre del mentor en el saludo
+                    document.getElementById('mentor-name').innerText = nombreUsuario;
+                }
+                
+            } else {
+                // --- CAMINO DEL ESTUDIANTE ---
+                // Ocultamos el dashboard de mentor por seguridad
+                const dashboardMentor = document.getElementById('screen-mentor-dashboard');
+                if (dashboardMentor) dashboardMentor.style.display = 'none';
+
+                // Mostrar Marketplace de Estudiante
+                document.getElementById('marketplace-screen').style.display = 'block';
+                document.getElementById('display-name').innerText = nombreUsuario;
+                
+                // Actualizar etiqueta de rol si existe
+                const roleDisplay = document.getElementById('display-role');
+                if(roleDisplay) roleDisplay.innerText = "ESTUDIANTE";
+            }
+            
+            // Ir al inicio de la página
+            window.scrollTo(0, 0);
+        }
+
+        function iniciarSalaMentor() {
+            // 1. Ocultar las métricas (Fila superior)
+            document.querySelector('.stats-row').style.display = 'none';
+
+            // 2. Ocultar la parte de abajo (Solicitudes y Guías)
+            document.querySelector('.dashboard-lower-grid').style.display = 'none';
+
+            // 3. Ocultar el Calendario
+            // (Como el calendario no tiene ID, ocultamos todas las tarjetas sueltas del contenedor)
+            const tarjetasSueltas = document.querySelectorAll('.mentor-container > .sapiens-card');
+            tarjetasSueltas.forEach(card => {
+                // Solo ocultamos si NO es el panel de post-meeting (por si acaso)
+                if (card.id !== 'mentor-post-meeting-embedded') {
+                    card.style.display = 'none';
+                }
+            });
+
+            // 4. Mostrar la Sala de Reunión
+            const sala = document.getElementById('mentor-meeting-embedded');
+            if (sala) {
+                sala.style.display = 'flex'; // Usamos flex para mantener el diseño interno
+                window.scrollTo(0, 0);
+            } else {
+                console.error("Error: No se encuentra el div 'mentor-meeting-embedded'");
+            }
+        }
+
+        // --- NUEVA LÓGICA DEL BUSCADOR ---
+// --- NUEVA LÓGICA DEL BUSCADOR COMPLETO ---
+        function realizarBusqueda() {
+            // Esta es para el input pequeño del home
+            const query = document.getElementById('search-input').value.toLowerCase();
+            ejecutarBusqueda(query);
+        }
+
+        function realizarBusquedaBig() {
+            // Esta es para el input grande de la pantalla de resultados
+            const query = document.getElementById('search-input-big').value.toLowerCase();
+            ejecutarBusqueda(query);
+        }
+
+        function ejecutarBusqueda(query) {
+            if (query.trim() === "") return;
+
+            // 1. Cambiar de pantalla
+            document.getElementById('default-feed').style.display = 'none';
+            document.getElementById('search-results-view').style.display = 'block';
+            document.getElementById('search-term-display').innerText = query;
+            document.getElementById('search-input-big').value = query;
+
+            // 2. GENERAR 3 TARJETAS DE TUTORÍA (Simuladas) con ONCLICK
+            const resultsGrid = document.getElementById('search-results-grid');
+            resultsGrid.innerHTML = ""; 
+            
+            let cardsData = [];
+
+            if (query.includes('python') || query.includes('programacion')) {
+                cardsData = [
+                    // AQUI AGREGAMOS EL ID para que coincida con cursoDetalleData
+                    { id: 2, titulo: "Refuerzo Python: Fundamentos", tutor: "Maria Pérez", precio: "$5", img: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80" },
+                    { id: 5, titulo: "Python para Data Science", tutor: "Carlos Ruiz", precio: "$8", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80" },
+                    { id: 6, titulo: "Scripts y Automatización", tutor: "David Reyes", precio: "$6", img: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" }
+                ];
+            } else {
+                // Datos genéricos
+                cardsData = [
+                    { id: 1, titulo: "Tutoría " + query + ": Nivel Básico", tutor: "Ana Vera", precio: "$5", img: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" },
+                    { id: 1, titulo: "Preparación Examen de " + query, tutor: "Luis Medina", precio: "$7", img: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" },
+                    { id: 1, titulo: "Resolución de ejercicios: " + query, tutor: "Sofía Mora", precio: "$6", img: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=600&q=80", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" }
+                ];
+            }
+
+            // Crear el HTML e inyectar el ONCLICK
+            cardsData.forEach(data => {
+                // Agregamos 'cursor: pointer' y el evento onclick llamando a verDetalles con el ID
+                const cardHTML = `
+                    <div class="tutor-card" style="cursor: pointer;" onclick="verDetalles(${data.id})">
+                        <img src="${data.img}" alt="Course" class="main-img">
+                        <div class="stars">★★★★★</div>
+                        <h4>${data.titulo}</h4>
+                        <p class="desc">Aprende ${query} de forma personalizada. Horarios flexibles y ayuda con deberes.</p>
+                        
+                        <div class="tutor-row">
+                            <div class="tutor-info">
+                                <img src="${data.avatar}" class="tutor-avatar" alt="Tutor">
+                                <span class="tutor-name">${data.tutor}</span>
+                            </div>
+                            <div class="price-tag">
+                                ${data.precio}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultsGrid.innerHTML += cardHTML;
+            });
+
+
+            // 3. Mostrar Mentores (Sin cambios aquí)
+            const mentorsGrid = document.getElementById('mentors-results-grid');
+            mentorsGrid.innerHTML = "";
+            let countMentors = 0;
+            
+            mentoresData.forEach(mentor => {
+                if (mentor.tags.includes(query) || mentor.role.toLowerCase().includes(query)) {
+                    const mentorCard = document.createElement('div');
+                    mentorCard.className = 'mentor-card';
+                    mentorCard.innerHTML = `
+                        <img src="${mentor.img}" alt="${mentor.name}">
+                        <h4>${mentor.name}</h4>
+                        <p>${mentor.role}</p>
+                        <button class="btn-primary">Ver Perfil</button>
+                    `;
+                    mentorsGrid.appendChild(mentorCard);
+                    countMentors++;
+                }
+            });
+
+            if (cardsData.length === 0) {
+                document.getElementById('no-results').style.display = 'block';
+                document.getElementById('search-results-grid').style.display = 'none';
+                document.getElementById('mentors-results-grid').style.display = 'none';
+            } else {
+                document.getElementById('no-results').style.display = 'none';
+                document.getElementById('search-results-grid').style.display = 'grid';
+                document.getElementById('mentors-results-grid').style.display = 'flex';
+            }
+        }
+        function volverAlFeed() {
+            // Limpiar input
+            document.getElementById('search-input').value = "";
+            // Ocultar resultados
+            document.getElementById('search-results-view').style.display = 'none';
+            // Mostrar feed original
+            document.getElementById('default-feed').style.display = 'block';
+        }
+
+
+        // --- FUNCIONES PARA VER DETALLES DEL CURSO ---
+        
+        // Esta función se llama al dar click en una tarjeta de resultado
+        function verDetalles(courseId) {
+            const data = cursoDetalleData[courseId]; 
+
+            if (!data) return; 
+
+            // 1. Llenar la nueva pantalla con los datos
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-tutor-name').innerText = data.tutorName;
+            document.getElementById('detail-student-role').innerText = data.tutorRole;
+            document.getElementById('detail-price').innerText = data.price;
+            
+            // Imágenes
+            document.getElementById('detail-tutor-img').src = data.tutorImg;
+            document.getElementById('detail-tutor-avatar-small').src = data.tutorImg; // Usamos la misma del tutor
+            document.getElementById('detail-course-img').src = data.courseImg;
+
+            // 2. Cambiar de pantalla (AQUI ESTABA EL ERROR)
+            document.getElementById('default-feed').style.display = 'none';        // <--- NUEVO: Ocultar el Inicio
+            document.getElementById('search-results-view').style.display = 'none'; // Ocultar resultados de búsqueda
+            
+            document.getElementById('course-details-view').style.display = 'block'; // Mostrar detalles
+            window.scrollTo(0, 0); // Volver arriba
+        }
+        // Función para el botón "Volver" de la pantalla de detalles
+// Función para el botón "Volver" de la pantalla de detalles
+        function volverAResultados() {
+            document.getElementById('course-details-view').style.display = 'none';
+            
+            // Verificamos si hay una búsqueda activa en el input grande
+            const busquedaActiva = document.getElementById('search-input-big').value;
+
+            if (busquedaActiva && busquedaActiva.trim() !== "") {
+                // Si había búsqueda, volvemos a la pantalla de resultados
+                document.getElementById('search-results-view').style.display = 'block';
+            } else {
+                // Si no, volvemos al inicio (Feed por defecto)
+                document.getElementById('default-feed').style.display = 'block';
+            }
+        }
+
+        // --- VARIABLES GLOBALES PARA CHECKOUT ---
+        let precioBase = 5.00; // Precio por hora
+        let horas = 1;
+
+        // Función para ir al Checkout (Se llama desde el botón "Reservar")
+        function irAlCheckout() {
+            // 1. Obtener datos del curso actual (del DOM de detalles)
+            const titulo = document.getElementById('detail-title').innerText;
+            const precioTexto = document.getElementById('detail-price').innerText; // Ej: "$5 por hora"
+            const img = document.getElementById('detail-course-img').src;
+
+            // 2. Limpiar precio para obtener número (quitar el "$" y texto)
+            precioBase = parseFloat(precioTexto.replace('$', '').split(' ')[0]);
+            horas = 1; // Reiniciar a 1 hora
+
+            // 3. Actualizar pantalla de Checkout
+            document.getElementById('checkout-title').innerText = titulo;
+            document.getElementById('checkout-img').src = img;
+            document.getElementById('checkout-base-price').innerText = "$" + precioBase.toFixed(2);
+            
+            actualizarCalculos();
+
+            // 4. Mostrar pantalla
+            document.getElementById('course-details-view').style.display = 'none';
+            document.getElementById('checkout-screen').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Función para volver
+        function volverADetalles() {
+            document.getElementById('checkout-screen').style.display = 'none';
+            document.getElementById('course-details-view').style.display = 'block';
+        }
+
+        // LÓGICA DEL CONTADOR DE HORAS
+        function cambiarHoras(cantidad) {
+            horas += cantidad;
+            if (horas < 1) horas = 1; // Mínimo 1 hora
+            
+            actualizarCalculos();
+        }
+
+        function actualizarCalculos() {
+            // Actualizar número de horas visual
+            document.getElementById('hours-count').innerText = horas;
+
+            // Cálculos matemáticos
+            const subtotal = precioBase * horas;
+            const fee = subtotal * 0.10; // 10% servicio
+            const tax = subtotal * 0.15; // 15% IVA (Ecuador)
+            const total = subtotal + fee + tax;
+
+            // Actualizar DOM con formato de moneda
+            document.getElementById('summary-subtotal').innerText = "$" + subtotal.toFixed(2);
+            document.getElementById('summary-fee').innerText = "$" + fee.toFixed(2);
+            document.getElementById('summary-tax').innerText = "$" + tax.toFixed(2);
+            document.getElementById('summary-total').innerText = "$" + total.toFixed(2);
+        }
+
+        // Finalizar
+// --- NAVEGACIÓN A LA SALA ---
+
+        // Esta función reemplaza a la anterior de "confirmarPago"
+        function confirmarPago() {
+            // 👇 AQUÍ PARAMOS EL RELOJ Y VALIDAMOS 👇
+            stopTimer();
+
+            // Efecto visual de carga (Feedback al usuario)
+            const btn = document.querySelector('#checkout-screen .btn-primary');
+            const textoOriginal = btn.innerText;
+            btn.innerText = "Procesando...";
+            
+            setTimeout(() => {
+                // Ocultar Checkout
+                document.getElementById('checkout-screen').style.display = 'none';
+                
+                // Mostrar Meeting
+                document.getElementById('meeting-screen').style.display = 'block';
+                
+                // Restaurar botón por si acaso
+                btn.innerText = textoOriginal;
+                
+                // Scroll arriba
+                window.scrollTo(0, 0);
+            }, 1000);
+        }
+
+// 1. Modificamos la función de salir para ir a la pantalla Post-Clase
+// Funcionalidad del Paso 4
+        function salirDeLaSala() {
+            
+            // CASO MENTOR (Usamos la nueva pantalla incrustada)
+            if (rolSeleccionado === 'Mentor') {
+                // A. Ocultar la Sala de Reunión
+                document.getElementById('mentor-meeting-embedded').style.display = 'none';
+
+                // B. Mostrar la Pantalla de Gestión Post-Clase (La que me pasaste)
+                const postPanel = document.getElementById('mentor-post-meeting-embedded');
+                if (postPanel) {
+                    postPanel.style.display = 'flex'; // Usamos flex para que se centre el contenido
+                    // Scroll suave arriba para que vea el mensaje de éxito
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    console.error("Error: No encuentro el div 'mentor-post-meeting-embedded'");
+                }
+                
+            } else {
+                // CASO ESTUDIANTE (Sigue usando el modal global antiguo)
+                document.getElementById('meeting-screen').style.display = 'none';
+                document.getElementById('post-class-screen').style.display = 'flex';
+                
+                // Configurar mensaje para estudiante
+                document.getElementById('post-class-msg').innerText = "Ayúdanos a mejorar calificando la sesión.";
+                document.getElementById('student-feedback-view').classList.remove('hidden');
+                if(document.getElementById('mentor-upload-view')) {
+                    document.getElementById('mentor-upload-view').classList.add('hidden');
+                }
+            }
+        }
+
+        function finalizarTodo() {
+            document.getElementById('post-class-screen').style.display = 'none';
+            if(rolSeleccionado === 'Mentor') {
+                document.getElementById('screen-mentor-dashboard').style.display = 'block';
+                alert("💰 ¡Excelente! Se han sumado $8.00 a tu billetera + el potencial de venta del PDF.");
+            } else {
+                document.getElementById('marketplace-screen').style.display = 'block';
+                alert("¡Gracias! Tus puntos de fidelidad han aumentado.");
+            }
+        }
+
+                // 2. Sistema de Estrellas simple
+        function rate(stars) {
+            const starContainer = document.getElementById('star-rating');
+            const starSpans = starContainer.children;
+            for (let i = 0; i < starSpans.length; i++) {
+                if (i < stars) {
+                    starSpans[i].style.color = '#F2C94C'; // Amarillo
+                } else {
+                    starSpans[i].style.color = '#ddd'; // Gris
+                }
+            }
+        }
+
+        function finalizarTodo() {
+            document.getElementById('post-class-screen').style.display = 'none';
+            
+            // Volver al dashboard correspondiente
+            if (rolSeleccionado === 'Mentor') {
+                document.getElementById('screen-mentor-dashboard').style.display = 'block';
+                // Simulación: Aumentar ganancias en el dashboard por la clase terminada
+                alert("💰 ¡Pago de $8.00 liberado en tu billetera!");
+            } else {
+                document.getElementById('marketplace-screen').style.display = 'block';
+                document.getElementById('default-feed').style.display = 'block'; // Asegurar que se ve el feed
+                window.scrollTo(0,0);
+            }
+        }
+
+        // --- FUNCIÓN IR AL INICIO (LOGO) ---
+        function irAlInicio() {
+            // 1. Ocultar todas las pantallas posibles
+            document.getElementById('course-details-view').style.display = 'none';
+            document.getElementById('checkout-screen').style.display = 'none';
+            document.getElementById('search-results-view').style.display = 'none';
+            document.getElementById('meeting-screen').style.display = 'none';
+
+            // 2. Mostrar el Marketplace
+            document.getElementById('marketplace-screen').style.display = 'block';
+
+            // 3. Asegurar que se vea el Feed Principal (y no resultados de búsqueda viejos)
+            document.getElementById('default-feed').style.display = 'block';
+            
+            // 4. Limpiar la barra de búsqueda
+            document.getElementById('search-input').value = "";
+
+            // 5. Restaurar estilos del body (por si vienes del Meeting oscuro)
+            document.body.style.backgroundColor = "white";
+            
+            // Ir arriba
+            window.scrollTo(0, 0);
+        }
+        function aceptarSolicitud(id) {
+            const card = document.getElementById(id);
+            card.style.background = '#D4EDDA';
+            card.style.border = '2px solid #27AE60';
+            card.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
+                    <h4 style="margin: 0 0 10px 0; color: #27AE60; font-size: 18px;">Solicitud Aceptada</h4>
+                    <p style="margin: 0; color: #666; font-size: 14px;">Se ha añadido a tu calendario</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                card.style.display = 'none';
+            }, 2000);
+        }
+
+        // --- FUNCIONES LÓGICA MENTOR ---
+
+        // Función para actualizar el nombre en el dashboard del mentor
+        function actualizarDashboardMentor(nombre) {
+            const dashName = document.getElementById('mentor-dash-name');
+            if(dashName) dashName.innerText = nombre;
+        }
+
+        // Sobrescribimos la función entrarAlMarketplace para añadir la actualización del nombre
+        // (Asegúrate de reemplazar tu función 'entrarAlMarketplace' actual con esta o agregar la llamada)
+        const oldEntrar = entrarAlMarketplace; // Guardamos referencia si quieres
+        entrarAlMarketplace = function(nombreUsuario) {
+            // Lógica original de ocultar/mostrar pantallas
+            document.getElementById('auth-screen').style.display = 'none';
+            document.body.style.display = 'block';
+            document.body.style.justifyContent = 'unset';
+            document.body.style.alignItems = 'unset';
+
+            if (rolSeleccionado === 'Mentor') {
+                document.getElementById('marketplace-screen').style.display = 'none';
+                document.getElementById('screen-mentor-dashboard').style.display = 'block';
+                actualizarDashboardMentor(nombreUsuario); // <--- NUEVA LÍNEA IMPORTANTE
+            } else {
+                const dashMentor = document.getElementById('screen-mentor-dashboard');
+                if(dashMentor) dashMentor.style.display = 'none';
+                document.getElementById('marketplace-screen').style.display = 'block';
+                document.getElementById('display-name').innerText = nombreUsuario;
+            }
+            window.scrollTo(0, 0);
+        };
+
+        // Animación al aceptar solicitud
+        function aceptarSolicitudAnimada(id) {
+            const card = document.getElementById(id);
+            // Cambiar estilo para feedback visual
+            card.style.transition = "all 0.5s ease";
+            card.style.transform = "scale(0.95)";
+            card.style.opacity = "0";
+            card.style.backgroundColor = "#D4EDDA";
+            
+            setTimeout(() => {
+                card.style.display = 'none';
+                // Aquí podríamos sumar +1 al contador de "Próximas Clases"
+                alert("¡Solicitud aceptada! Se ha añadido a tu calendario.");
+            }, 500);
+        }
+
+        function ocultarSolicitud(id) {
+            const card = document.getElementById(id);
+            card.style.opacity = "0";
+            setTimeout(() => card.style.display = 'none', 300);
+        }
+                
+        function abrirSimuladorIA() {
+            document.getElementById('ai-simulator-screen').style.display = 'flex';
+            // Resetear vistas
+            document.getElementById('ai-view-config').classList.remove('hidden');
+            document.getElementById('ai-view-exam').classList.add('hidden');
+            document.getElementById('ai-view-result').classList.add('hidden');
+            document.getElementById('ai-topic-input').value = "";
+        }
+
+        function selectDiff(el) {
+            document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function iniciarExamenIA() {
+            const topic = document.getElementById('ai-topic-input').value;
+            if(!topic) { alert("Por favor escribe un tema"); return; }
+
+            // Cambiar a vista de examen
+            document.getElementById('ai-view-config').classList.add('hidden');
+            document.getElementById('ai-view-exam').classList.remove('hidden');
+            
+            // Personalizar pregunta simulada
+            document.getElementById('ai-question-text').innerText = `Pregunta 1: ¿Concepto clave de ${topic}?`;
+        }
+
+        function selectOption(el) {
+            document.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function finalizarExamenIA() {
+            // Mostrar loader breve
+            const btn = document.querySelector('#ai-view-exam .btn-primary');
+            btn.innerText = "Calificando...";
+            
+            setTimeout(() => {
+                document.getElementById('ai-view-exam').classList.add('hidden');
+                document.getElementById('ai-view-result').classList.remove('hidden');
+                
+                const topic = document.getElementById('ai-topic-input').value;
+                document.getElementById('ai-result-topic').innerText = topic;
+                btn.innerText = "Enviar Respuestas"; // Restaurar
+            }, 1500);
+        }
+
+        function cerrarSimulador() {
+            document.getElementById('ai-simulator-screen').style.display = 'none';
+        }
+
+        // LÓGICA HIPÓTESIS 1 (CRONÓMETRO)
+        let timerInterval;
+        let seconds = 0;
+
+        function startTimer() {
+            document.getElementById('validation-timer').style.display = 'block';
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('time-count').innerText = seconds + "s";
+                if(seconds > 90) document.getElementById('time-count').style.color = "#E53E3E"; // Rojo si falla
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            if(seconds < 90) alert(`✅ HIPÓTESIS VALIDADA: Reserva en ${seconds}s.`);
+            else alert(`⚠️ TIEMPO EXCEDIDO: ${seconds}s.`);
+            document.getElementById('validation-timer').style.display = 'none';
+        }
+
+        // --- LÓGICA HIPÓTESIS 2 (MENTOR) ---
+        function validarTarifa() {
+            const rate = document.getElementById('mentor-rate').value;
+            
+            if (rate && rate > 0) {
+                // Feedback visual de éxito
+                alert(`✅ HIPÓTESIS 2 VALIDADA: El mentor estableció su tarifa en $${rate}/hora. (Interés Económico Confirmado)`);
+                
+                // Ocultamos la tarjeta para simular que ya se guardó
+                // (El botón está dentro de la tarjeta, así que buscamos su contenedor padre)
+                const card = document.getElementById('mentor-rate').closest('.sapiens-card');
+                card.style.display = 'none';
+                
+                alert("¡Perfil actualizado! Ahora eres visible para los estudiantes.");
+            } else {
+                alert("Por favor, ingresa un valor válido (ej. 5.00) para continuar.");
+            }
+        }
+
+        // --- FUNCIÓN CERRAR SESIÓN ---
+        // --- FUNCIÓN CERRAR SESIÓN (CORREGIDA) ---
+// --- FUNCIÓN CERRAR SESIÓN (SOLUCIÓN DEFINITIVA) ---
+        function cerrarSesion() {
+            if(confirm("¿Estás seguro de que deseas salir?")) {
+                // Esto recarga la página como si presionaras F5.
+                // Es la forma más segura de volver al inicio limpio.
+                location.reload(); 
+            }
+        }
+
+        function registrarUsuario() {
+            const user = document.getElementById('reg-user').value;
+            if (user === "") { alert("Completa los datos"); return; }
+
+            // 1. OCULTAR TODO LO PREVIO (Para evitar superposiciones)
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('role-screen').style.display = 'none';
+
+            // 2. DECISIÓN: ¿Es Mentor o Estudiante?
+            if (rolSeleccionado === 'Mentor') {
+                // -> MENTOR: Lo mandamos a la pantalla de validación que acabamos de pegar
+                document.getElementById('mentor-validation-screen').style.display = 'flex';
+                localStorage.setItem('tempUser', user); // Guardamos el nombre
+            } else {
+                // -> ESTUDIANTE: Pasa directo (No requiere validación académica)
+                alert("¡Registro exitoso! Bienvenido a Sapiens.");
+                document.getElementById('marketplace-screen').style.display = 'block';
+                document.getElementById('display-name').innerText = user;
+                if(typeof startTimer === 'function') startTimer();
+            }
+        }
+
+        // Función para el botón final de la validación
+        function finalizarValidacionMentor() {
+            // Simula envío de datos
+            document.getElementById('mentor-validation-screen').style.display = 'none';
+            
+            // Ahora sí, mostramos el Dashboard
+            document.getElementById('screen-mentor-dashboard').style.display = 'block';
+            
+            // Ponemos el nombre
+            const user = localStorage.getItem('tempUser') || "Mentor";
+            if(document.getElementById('mentor-dash-name')) {
+                document.getElementById('mentor-dash-name').innerText = user;
+            }
+            
+            alert("✅ Perfil verificado. Bienvenido al equipo de Mentores.");
+        }
+
+        function finalizarMentorFlow() {
+            // A. Ocultar la pantalla de Post-Clase
+            document.getElementById('mentor-post-meeting-embedded').style.display = 'none';
+
+            // B. Volver a mostrar los Widgets del Dashboard (Restaurar el estado inicial)
+            // Como los ocultamos manualmente al iniciar la sala, ahora los mostramos manualmente
+            document.querySelector('.stats-row').style.display = 'grid';
+            document.querySelector('.dashboard-lower-grid').style.display = 'grid';
+            
+            // Restaurar cualquier tarjeta suelta (como el calendario)
+            const cards = document.querySelectorAll('.mentor-container > .sapiens-card');
+            cards.forEach(card => card.style.display = 'block');
+
+            // C. Feedback final
+            alert("✅ ¡Flujo completado! Tus ganancias han sido actualizadas.");
+        }
+    </script>
+
+</body>
+</html>
+    <!-- ========================================== -->
+    <!-- INTEGRACIÓN FIREBASE -->
+    <!-- ========================================== -->
+    <script>
+        // OVERRIDE: Función registrarUsuario para integrar con Firebase
+        const registrarUsuarioOriginal = registrarUsuario;
+        registrarUsuario = async function() {
+            const nombre = document.getElementById('reg-user').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-pass').value;
+            
+            if (!nombre || !email || !password) {
+                alert("Por favor completa todos los campos");
+                return;
+            }
+
+            try {
+                if (rolSeleccionado === 'Mentor') {
+                    localStorage.setItem('tempNombre', nombre);
+                    localStorage.setItem('tempEmail', email);
+                    localStorage.setItem('tempPassword', password);
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('role-screen').style.display = 'none';
+                    document.getElementById('mentor-validation-screen').style.display = 'flex';
+                } else {
+                    await registrarEstudiante(email, password, nombre);
+                }
+            } catch (error) {
+                console.error("Error en registro:", error);
+                alert('Error: ' + error.message);
+            }
+        };
+
+        // OVERRIDE: Función finalizarValidacionMentor
+        const finalizarValidacionMentorOriginal = finalizarValidacionMentor;
+        finalizarValidacionMentor = async function() {
+            const nombre = localStorage.getItem('tempNombre');
+            const email = localStorage.getItem('tempEmail');
+            const password = localStorage.getItem('tempPassword');
+            const universidad = document.getElementById('mentor-university')?.value || 'ESPOL';
+            const materias = document.getElementById('mentor-subjects')?.value || 'Cálculo';
+            const precioHora = document.getElementById('mentor-rate')?.value || 5;
+            
+            try {
+                await registrarMentor(email, password, nombre, universidad, materias, precioHora);
+                localStorage.removeItem('tempNombre');
+                localStorage.removeItem('tempEmail');
+                localStorage.removeItem('tempPassword');
+            } catch (error) {
+                console.error("Error al crear mentor:", error);
+                alert('Error: ' + error.message);
+            }
+        };
+
+        // NUEVA: Función para login con Firebase
+        async function iniciarSesionBtn() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-pass').value;
+            
+            if (!email || !password) {
+                alert("Por favor completa todos los campos");
+                return;
+            }
+
+            try {
+                await iniciarSesion(email, password);
+            } catch (error) {
+                console.error("Error en login:", error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // OVERRIDE: Función cerrarSesion
+        const cerrarSesionOriginal = cerrarSesion;
+        cerrarSesion = async function() {
+            if(confirm("¿Estás seguro de que deseas salir?")) {
+                try {
+                    if (typeof auth !== 'undefined' && auth.currentUser) {
+                        await auth.signOut();
+                    }
+                    localStorage.clear();
+                    location.reload();
+                } catch (error) {
+                    console.error("Error cerrando sesión:", error);
+                    location.reload();
+                }
+            }
+        };
+
+        // Listener para cuando Firebase esté listo
+        window.addEventListener('load', function() {
+            console.log("🔥 Sapiens cargado. Firebase listo.");
+            if (typeof auth !== 'undefined') {
+                auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        console.log("Usuario autenticado:", user.email);
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        // Conectar botón de login con Firebase
+        function conectarBotonLogin() {
+            // Buscar el botón de login
+            const loginButtons = document.querySelectorAll('button');
+            
+            loginButtons.forEach(btn => {
+                if (btn.textContent.trim() === 'Login') {
+                    btn.onclick = function(e) {
+                        e.preventDefault();
+                        iniciarSesionBtn();
+                    };
+                }
+            });
+        }
+        
+        // Ejecutar cuando la página cargue
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(conectarBotonLogin, 500);
+        });
+    </script>
+    <!-- ========================================== -->
+    <!-- FIREBASE SDK (CDN) -->
+    <!-- ========================================== -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- ========================================== -->
+    <!-- BACKEND SAPIENS -->
+    <!-- ========================================== -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth-module.js"></script>
+    <script src="js/student-module.js"></script>
+    <script src="js/mentor-module.js"></script>
+    <script src="js/session-module.js"></script>
+    <script src="js/ui-integration.js"></script>
+
