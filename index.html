@@ -2202,22 +2202,47 @@
             document.getElementById('validation-timer').style.display = 'none';
         }
 
-        // --- LÓGICA HIPÓTESIS 2 (MENTOR) ---
-        function validarTarifa() {
-            const rate = document.getElementById('mentor-rate').value;
+                // --- LÓGICA HIPÓTESIS 2 (MENTOR) ---
+        async function validarTarifa() {
+            const rateInput = document.getElementById('mentor-rate');
+            const precio = parseFloat(rateInput.value);
             
-            if (rate && rate > 0) {
-                // Feedback visual de éxito
-                alert(`✅ HIPÓTESIS 2 VALIDADA: El mentor estableció su tarifa en $${rate}/hora. (Interés Económico Confirmado)`);
+            if (!precio || precio <= 0) {
+                alert("Por favor ingresa un precio válido (ej: 5)");
+                return;
+            }
+
+            try {
+                // Asegurarnos que tenemos el usuario actual
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert("Error: No estás autenticado");
+                    return;
+                }
+
+                const btn = document.querySelector('button[onclick="validarTarifa()"]');
+                const textoOriginal = btn.innerText;
+                btn.innerText = "Guardando...";
+                btn.disabled = true;
+
+                // 1. Guardar en Firebase
+                await db.collection('users').doc(user.uid).update({
+                    hourly_rate: precio,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 2. Feedback visual (Ocultamos la tarjeta como en tu demo original)
+                alert(`✅ Tarifa actualizada a $${precio}/hora correctamente.`);
                 
-                // Ocultamos la tarjeta para simular que ya se guardó
-                // (El botón está dentro de la tarjeta, así que buscamos su contenedor padre)
+                // Opcional: Ocultar la tarjeta de "Acción Requerida" ya que ya configuró el precio
                 const card = document.getElementById('mentor-rate').closest('.sapiens-card');
-                card.style.display = 'none';
-                
-                alert("¡Perfil actualizado! Ahora eres visible para los estudiantes.");
-            } else {
-                alert("Por favor, ingresa un valor válido (ej. 5.00) para continuar.");
+                if(card) card.style.display = 'none';
+
+            } catch (error) {
+                console.error("Error guardando tarifa:", error);
+                alert("Hubo un error al guardar la tarifa.");
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
             }
         }
 

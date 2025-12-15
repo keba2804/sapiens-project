@@ -4,33 +4,30 @@
 
 // ===== CARGAR DASHBOARD DEL MENTOR =====
 async function cargarDashboardMentor(mentorId) {
-  try {
-    // Obtener datos del mentor
-    const mentorDoc = await db.collection('users').doc(mentorId).get();
-    const mentor = mentorDoc.data();
-    
-    // Actualizar billetera en UI
-    if (document.getElementById('wallet-balance')) {
-      document.getElementById('wallet-balance').textContent = formatPrice(mentor.wallet_balance);
+    console.log("🚀 Cargando Dashboard para Mentor:", mentorId); // Log para verificar
+
+    try {
+        // 1. Cargar datos del perfil
+        const mentorDoc = await db.collection('users').doc(mentorId).get();
+        const mentor = mentorDoc.data();
+
+        // 2. Llenar datos visuales (Nombre, Wallet, etc)
+        if (document.getElementById('mentor-dash-name')) 
+            document.getElementById('mentor-dash-name').innerText = mentor.name;
+        
+        if (document.getElementById('wallet-balance')) 
+            document.getElementById('wallet-balance').textContent = "$" + (mentor.wallet_balance || 0).toFixed(2);
+
+        // 3. CARGAR EL CALENDARIO (Solución punto 2)
+        inicializarCalendarioMentor(mentor.availability);
+
+        // 4. ACTIVAR ESCUCHA EN TIEMPO REAL (Solución punto 3)
+        // Esto es lo que hace que aparezca "de una"
+        escucharSolicitudesPendientes(mentorId);
+
+    } catch (error) {
+        console.error("Error cargando dashboard:", error);
     }
-    
-    // Actualizar rating
-    if (document.getElementById('mentor-rating')) {
-      document.getElementById('mentor-rating').textContent = mentor.rating.toFixed(1);
-    }
-    if (document.getElementById('reviews-count')) {
-      document.getElementById('reviews-count').textContent = mentor.reviews_count;
-    }
-    
-    // Cargar solicitudes pendientes
-    escucharSolicitudesPendientes(mentorId);
-    
-    // Cargar próximas clases
-    escucharProximasClases(mentorId);
-    
-  } catch (error) {
-    console.error("Error cargando dashboard:", error);
-  }
 }
 
 // ===== ESCUCHAR SOLICITUDES PENDIENTES EN TIEMPO REAL =====
@@ -208,3 +205,104 @@ async function finalizarClaseFirebase(sessionId) {
     console.error("Error finalizando clase:", error);
   }
 }
+
+// En js/mentor-module.js
+
+// Variable temporal para guardar los cambios antes de enviarlos a Firebase
+let disponibilidadTemporal = {};
+
+function inicializarCalendarioMentor(disponibilidadActual = {}) {
+    const contenedor = document.getElementById('calendar-grid');
+    if (!contenedor) return;
+
+    // Guardamos lo que viene de Firebase o iniciamos vacío
+    disponibilidadTemporal = disponibilidadActual || {};
+
+    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const horas = ['09:00', '10:00', '11:00', '15:00', '16:00', '17:00'];
+
+    let html = '';
+
+    // 1. Crear encabezados de días
+    html += '<div style="grid-column: 1/-1; display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">';
+    html += '<div></div>'; // Espacio para la columna de horas
+    dias.forEach(d => {
+        html += `<div style="text-align: center; font-weight: bold; text-transform: capitalize; color: #555;">${d}</div>`;
+    });
+    html += '</div>';
+
+    // 2. Crear filas por hora
+    horas.forEach(hora => {
+        html += `<div style="display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">`;
+        
+        // Etiqueta de hora
+        html += `<div style="display:flex; align-items:center; justify-content:flex-end; padding-right:10px; font-size:12px; font-weight:bold; color:#666;">${hora}</div>`;
+
+        // Botones por día
+        dias.forEach(dia => {
+            // Verificar si esta hora ya está activa en la BD
+            // Nota: Normalizamos quitando los ':' si tu BD usa formato '0900', o dejándolos si usa '09:00'
+            const estaActivo = disponibilidadTemporal[dia] && disponibilidadTemporal[dia][hora] === true;
+            
+            const colorBg = estaActivo ? '#4FBDBA' : '#EDF2F7';
+            const colorTxt = estaActivo ? 'white' : '#A0AEC0';
+
+            html += `
+                <div onclick="toggleHora('${dia}', '${hora}', this)" 
+                     style="background: ${colorBg}; color: ${colorTxt}; border-radius: 6px; cursor: pointer; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s;"
+                     data-activo="${estaActivo}">
+                     ${estaActivo ? '✓' : '·'}
+                </div>
+            `;
+        });
+        html += `</div>`;
+    });
+
+    // 3. Botón de guardar cambios
+    html += `
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="guardarHorarioFirebase()" class="btn-primary" style="width: auto; padding: 10px 30px;">
+                💾 Guardar Mi Horario
+            </button>
+        </div>
+    `;
+
+    contenedor.innerHTML = html;
+    // Quitamos el estilo grid original del contenedor para usar el nuestro interno más flexible
+    contenedor.style.display = 'block'; 
+}
+
+// Función para marcar/desmarcar (visual y lógica)
+window.toggleHora = function(dia, hora, elemento) {
+    // Inicializar el día si no existe
+    if (!disponibilidadTemporal[dia]) disponibilidadTemporal[dia] = {};
+
+    // Cambiar estado
+    const estadoActual = elemento.getAttribute('data-activo') === 'true';
+    const nuevoEstado = !estadoActual;
+
+    // Actualizar lógica
+    disponibilidadTemporal[dia][hora] = nuevoEstado;
+
+    // Actualizar visual
+    elemento.setAttribute('data-activo', nuevoEstado);
+    elemento.style.background = nuevoEstado ? '#4FBDBA' : '#EDF2F7';
+    elemento.style.color = nuevoEstado ? 'white' : '#A0AEC0';
+    elemento.innerText = nuevoEstado ? '✓' : '·';
+};
+
+// Función para guardar en la BD
+window.guardarHorarioFirebase = async function() {
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        await db.collection('users').doc(user.uid).update({
+            availability: disponibilidadTemporal
+        });
+        alert("✅ Horario actualizado. Los estudiantes ahora verán tu nueva disponibilidad.");
+    } catch (e) {
+        console.error(e);
+        alert("Error al guardar horario");
+    }
+};
