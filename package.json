@@ -1,0 +1,25 @@
+{
+  "name": "sapiens-platform",
+  "version": "1.0.0",
+  "description": "Plataforma de tutorías universitarias P2P",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p $PORT -c-1",
+    "dev": "npx http-server -p 8080 -c-1",
+    "test": "echo \"No tests configured yet\""
+  },
+  "keywords": [
+    "tutoring",
+    "education",
+    "firebase",
+    "p2p"
+  ],
+  "author": "Sapiens Team",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
