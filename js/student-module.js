@@ -1,12 +1,14 @@
 // ====================================
-// MÓDULO DEL ESTUDIANTE (VERSIÓN COMPLETA FERIA)
+// MÓDULO DEL ESTUDIANTE - VERSIÓN MEJORADA CON BÚSQUEDA Y ORDENAMIENTO
 // ====================================
 
 // variable global para el listener
 let unsubscribeMisClases = null;
+let ordenamientoActual = 'recientes';
+let filtrosActivos = {};
 
-// ===== 1. CARGAR TUTORES REALES DE FIREBASE =====
-async function cargarTutores(filtroMateria = null) {
+// ===== 1. CARGAR TUTORES REALES DE FIREBASE CON ORDENAMIENTO =====
+async function cargarTutores(filtroMateria = null, ordenamiento = 'recientes') {
   try {
     let query = db.collection('users')
       .where('role', '==', 'mentor');
@@ -26,10 +28,47 @@ async function cargarTutores(filtroMateria = null) {
       });
     });
     
-    // Ordenar por rating (los mejores primero)
-    tutores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    // Aplicar ordenamiento según el criterio seleccionado
+    switch(ordenamiento) {
+      case 'recientes':
+        // Ordenar por fecha de creación (más nuevos primero)
+        tutores.sort((a, b) => {
+          const fechaA = a.created_at?.toDate() || new Date(0);
+          const fechaB = b.created_at?.toDate() || new Date(0);
+          return fechaB - fechaA; // Descendente (más recientes primero)
+        });
+        break;
+      
+      case 'rating':
+        // Ordenar por calificación (mejores primero)
+        tutores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      
+      case 'precio-bajo':
+        // Ordenar por precio (más barato primero)
+        tutores.sort((a, b) => (a.hourly_rate || 99) - (b.hourly_rate || 99));
+        break;
+      
+      case 'precio-alto':
+        // Ordenar por precio (más caro primero)
+        tutores.sort((a, b) => (b.hourly_rate || 0) - (a.hourly_rate || 0));
+        break;
+      
+      case 'experiencia':
+        // Ordenar por número de clases (más experimentados primero)
+        tutores.sort((a, b) => (b.total_classes || 0) - (a.total_classes || 0));
+        break;
+      
+      default:
+        // Por defecto: más recientes
+        tutores.sort((a, b) => {
+          const fechaA = a.created_at?.toDate() || new Date(0);
+          const fechaB = b.created_at?.toDate() || new Date(0);
+          return fechaB - fechaA;
+        });
+    }
     
-    console.log(`Tutores cargados: ${tutores.length}`);
+    console.log(`Tutores cargados: ${tutores.length} (ordenados por: ${ordenamiento})`);
     return tutores;
     
   } catch (error) {
@@ -38,7 +77,146 @@ async function cargarTutores(filtroMateria = null) {
   }
 }
 
-// ===== 2. ESCUCHAR MIS CLASES (CORE DEL MATCH EN FERIA) =====
+// ===== BÚSQUEDA AVANZADA DE MENTORES =====
+async function buscarMentores(criterios = {}) {
+  try {
+    const { 
+      texto = '', 
+      materia = null, 
+      universidad = null, 
+      precioMax = null,
+      ratingMin = null,
+      ordenamiento = 'recientes'
+    } = criterios;
+    
+    console.log("🔍 Buscando mentores con criterios:", criterios);
+    
+    // Obtener todos los mentores
+    let tutores = await cargarTutores(materia, ordenamiento);
+    
+    // Aplicar filtros adicionales
+    tutores = tutores.filter(tutor => {
+      // Filtro por texto (nombre, materias, universidad)
+      if (texto && texto.trim() !== '') {
+        const textoLower = texto.toLowerCase();
+        const nombreMatch = tutor.name?.toLowerCase().includes(textoLower);
+        const materiasMatch = tutor.subjects?.some(m => m.toLowerCase().includes(textoLower));
+        const uniMatch = tutor.university?.toLowerCase().includes(textoLower);
+        
+        if (!nombreMatch && !materiasMatch && !uniMatch) {
+          return false;
+        }
+      }
+      
+      // Filtro por universidad
+      if (universidad && universidad !== 'todas') {
+        if (tutor.university !== universidad) {
+          return false;
+        }
+      }
+      
+      // Filtro por precio máximo
+      if (precioMax && tutor.hourly_rate > precioMax) {
+        return false;
+      }
+      
+      // Filtro por rating mínimo
+      if (ratingMin && (tutor.rating || 0) < ratingMin) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    console.log(`✅ Búsqueda completada: ${tutores.length} resultados`);
+    return tutores;
+    
+  } catch (error) {
+    console.error("❌ Error en búsqueda:", error);
+    return [];
+  }
+}
+
+// ===== APLICAR BÚSQUEDA DESDE LA UI =====
+async function aplicarBusqueda() {
+  const texto = document.getElementById('search-input-mentores')?.value || '';
+  const materia = document.getElementById('filtro-materia')?.value || null;
+  const universidad = document.getElementById('filtro-universidad')?.value || 'todas';
+  const precioMax = parseFloat(document.getElementById('filtro-precio')?.value) || null;
+  const ratingMin = parseFloat(document.getElementById('filtro-rating')?.value) || null;
+  const ordenamiento = document.getElementById('select-ordenamiento')?.value || 'recientes';
+  
+  filtrosActivos = {
+    texto,
+    materia: materia && materia !== 'todas' ? materia : null,
+    universidad: universidad !== 'todas' ? universidad : null,
+    precioMax,
+    ratingMin,
+    ordenamiento
+  };
+  
+  mostrarLoader('Buscando mentores...');
+  
+  try {
+    const tutores = await buscarMentores(filtrosActivos);
+    const gridTutores = document.getElementById('tutores-reales-grid');
+    
+    if (gridTutores) {
+      renderizarTutores(tutores, gridTutores);
+      
+      // Actualizar contador
+      const badge = document.getElementById('mentor-count-badge');
+      if (badge) {
+        badge.textContent = `${tutores.length} Encontrado${tutores.length !== 1 ? 's' : ''}`;
+      }
+      
+      // Mostrar mensaje si no hay resultados
+      if (tutores.length === 0) {
+        gridTutores.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;">🔍</div>
+            <h3 style="color: #666; margin: 0 0 10px 0;">No encontramos mentores</h3>
+            <p style="color: #999; margin: 0;">Intenta ajustar los filtros de búsqueda</p>
+            <button onclick="limpiarFiltros()" style="margin-top: 20px; padding: 12px 30px; background: #4FBDBA; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+              Limpiar Filtros
+            </button>
+          </div>
+        `;
+      }
+    }
+  } catch (error) {
+    console.error("Error aplicando búsqueda:", error);
+    mostrarAlerta('Error al buscar mentores', 'error');
+  } finally {
+    ocultarLoader();
+  }
+}
+
+// ===== LIMPIAR FILTROS =====
+function limpiarFiltros() {
+  if (document.getElementById('search-input-mentores')) {
+    document.getElementById('search-input-mentores').value = '';
+  }
+  if (document.getElementById('filtro-materia')) {
+    document.getElementById('filtro-materia').value = 'todas';
+  }
+  if (document.getElementById('filtro-universidad')) {
+    document.getElementById('filtro-universidad').value = 'todas';
+  }
+  if (document.getElementById('filtro-precio')) {
+    document.getElementById('filtro-precio').value = '';
+  }
+  if (document.getElementById('filtro-rating')) {
+    document.getElementById('filtro-rating').value = '';
+  }
+  if (document.getElementById('select-ordenamiento')) {
+    document.getElementById('select-ordenamiento').value = 'recientes';
+  }
+  
+  filtrosActivos = {};
+  aplicarBusqueda();
+}
+
 // ===== 2. ESCUCHAR MIS CLASES (CON TIEMPO REAL MEJORADO) =====
 function escucharMisClasesEstudiante(studentId) {
   console.log("👂 Estudiante escuchando cambios en sus clases:", studentId);
@@ -152,6 +330,7 @@ function escucharMisClasesEstudiante(studentId) {
       }, 3000);
     });
 }
+
 // ===== 3. RESERVAR TUTORÍA (CONECTADO A FIREBASE) =====
 async function reservarTutoria(tutorId, materia, fecha, hora, duracion = 1) {
   try {
@@ -329,3 +508,5 @@ function mostrarNotificacion(mensaje) {
     }, 300);
   }, 4000);
 }
+
+console.log("✅ Módulo Estudiante MEJORADO: Búsqueda + Ordenamiento + Filtros");

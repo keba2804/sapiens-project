@@ -1039,6 +1039,187 @@
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary);">
             </div>
         </div>
+        
+        <!-- ========================================== -->
+        <!-- SECCIÓN DE BÚSQUEDA Y FILTROS AVANZADOS   -->
+        <!-- Insertar después del header en marketplace-screen -->
+        <!-- ========================================== -->
+
+        <div id="seccion-busqueda-filtros" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; border-radius: 24px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <!-- Barra de Búsqueda Principal -->
+            <div style="max-width: 800px; margin: 0 auto 30px auto;">
+                <h2 style="color: white; text-align: center; margin: 0 0 25px 0; font-size: 28px; font-weight: 800;">
+                    🔍 Encuentra tu Mentor Ideal
+                </h2>
+                
+                <div style="display: flex; gap: 10px; background: white; padding: 8px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <input 
+                        type="text" 
+                        id="search-input-mentores" 
+                        placeholder="Busca por nombre, materia o universidad..." 
+                        style="flex: 1; border: none; padding: 16px 20px; font-size: 16px; border-radius: 12px; outline: none; background: #f8f9fa; margin: 0;"
+                        onkeypress="if(event.key==='Enter') aplicarBusqueda()"
+                    >
+                    <button 
+                        onclick="aplicarBusqueda()" 
+                        style="background: #4FBDBA; color: white; border: none; padding: 16px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; white-space: nowrap;"
+                        onmouseover="this.style.background='#3CAEA5'; this.style.transform='scale(1.05)'" 
+                        onmouseout="this.style.background='#4FBDBA'; this.style.transform='scale(1)'"
+                    >
+                        🔍 Buscar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Toggle para Filtros Avanzados -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button 
+                    id="btn-toggle-filtros" 
+                    onclick="toggleFiltrosAvanzados()" 
+                    style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'"
+                >
+                    ⚙️ Filtros Avanzados
+                </button>
+            </div>
+            
+            <!-- Panel de Filtros Avanzados (Colapsable) -->
+            <div id="panel-filtros-avanzados" style="display: none; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
+                <h3 style="margin: 0 0 20px 0; color: #333; font-size: 20px; font-weight: 700;">
+                    Refina tu búsqueda
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <!-- Filtro por Materia -->
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 8px;">
+                            📚 Materia
+                        </label>
+                        <select 
+                            id="filtro-materia" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; cursor: pointer; background: white;"
+                            onchange="aplicarBusqueda()"
+                        >
+                            <option value="todas">Todas las materias</option>
+                            <option value="Cálculo">Cálculo</option>
+                            <option value="Física">Física</option>
+                            <option value="Python">Python</option>
+                            <option value="Programación">Programación</option>
+                            <option value="Química">Química</option>
+                            <option value="Estadística">Estadística</option>
+                            <option value="Álgebra Lineal">Álgebra Lineal</option>
+                            <option value="Estructuras de Datos">Estructuras de Datos</option>
+                            <option value="Bases de Datos">Bases de Datos</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filtro por Universidad -->
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 8px;">
+                            🏫 Universidad
+                        </label>
+                        <select 
+                            id="filtro-universidad" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; cursor: pointer; background: white;"
+                            onchange="aplicarBusqueda()"
+                        >
+                            <option value="todas">Todas</option>
+                            <option value="ESPOL">ESPOL</option>
+                            <option value="Universidad de Guayaquil">Universidad de Guayaquil</option>
+                            <option value="UCSG">UCSG</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filtro por Precio Máximo -->
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 8px;">
+                            💰 Precio Máximo ($/hora)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="filtro-precio" 
+                            placeholder="Ej: 10" 
+                            min="0" 
+                            max="50" 
+                            step="0.5"
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; margin: 0;"
+                            onchange="aplicarBusqueda()"
+                        >
+                    </div>
+                    
+                    <!-- Filtro por Rating Mínimo -->
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 8px;">
+                            ⭐ Rating Mínimo
+                        </label>
+                        <select 
+                            id="filtro-rating" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; outline: none; cursor: pointer; background: white;"
+                            onchange="aplicarBusqueda()"
+                        >
+                            <option value="">Cualquiera</option>
+                            <option value="4.5">4.5+ ⭐</option>
+                            <option value="4.0">4.0+ ⭐</option>
+                            <option value="3.5">3.5+ ⭐</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Botón Limpiar Filtros -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <button 
+                        onclick="limpiarFiltros()" 
+                        style="background: #f44336; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: all 0.3s;"
+                        onmouseover="this.style.background='#d32f2f'" 
+                        onmouseout="this.style.background='#f44336'"
+                    >
+                        🗑️ Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- BARRA DE ORDENAMIENTO -->
+        <!-- ========================================== -->
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px;">
+            <div>
+                <h3 style="font-size: 22px; color: #1A202C; margin: 0;">
+                    🔴 Mentores Disponibles
+                </h3>
+                <p style="color: #718096; font-size: 14px; margin: 5px 0 0 0;">
+                    Conecta con expertos universitarios
+                </p>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <label style="font-size: 14px; font-weight: 600; color: #555;">
+                    Ordenar por:
+                </label>
+                <select 
+                    id="select-ordenamiento" 
+                    style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; cursor: pointer; background: white; color: #333;"
+                    onchange="aplicarBusqueda()"
+                >
+                    <option value="recientes">🆕 Más Recientes</option>
+                    <option value="rating">⭐ Mejor Calificados</option>
+                    <option value="precio-bajo">💵 Precio: Menor a Mayor</option>
+                    <option value="precio-alto">💰 Precio: Mayor a Menor</option>
+                    <option value="experiencia">🎓 Más Experimentados</option>
+                </select>
+                
+                <span 
+                    id="mentor-count-badge" 
+                    style="background: #F0FFF4; color: #2F855A; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid #C6F6D5; white-space: nowrap;"
+                >
+                    Cargando...
+                </span>
+            </div>
+        </div>
+
+
 
         <div id="default-feed">
             
@@ -1092,7 +1273,7 @@
                 </div>
             </div>
     
-            <div class="section-container" style="margin-top: 60px;">
+            <div class="section-container" style="margin-top: 60px; display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3>Recomendados para ti</h3>
                     <div style="display: flex; gap: 10px;">
@@ -1584,7 +1765,57 @@
     .quiz-opt { padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
     .quiz-opt:hover, .quiz-opt.selected { background: #F3F0FF; border-color: #6C63FF; font-weight: bold; }
     </style>
+    
+    <script>
+    // Función para toggle de filtros avanzados
+    function toggleFiltrosAvanzados() {
+        const panel = document.getElementById('panel-filtros-avanzados');
+        const btn = document.getElementById('btn-toggle-filtros');
+        
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            btn.innerHTML = '⚙️ Ocultar Filtros';
+        } else {
+            panel.style.display = 'none';
+            btn.innerHTML = '⚙️ Filtros Avanzados';
+        }
+    }
+    </script>
 
+    <style>
+    /* Estilos adicionales para mejorar la experiencia */
+    #search-input-mentores::placeholder {
+        color: #aaa;
+        font-style: italic;
+    }
+
+    #filtro-materia:hover,
+    #filtro-universidad:hover,
+    #filtro-rating:hover,
+    #select-ordenamiento:hover {
+        border-color: #4FBDBA;
+    }
+
+    #filtro-precio:focus {
+        border-color: #4FBDBA;
+    }
+
+    /* Animación para el panel de filtros */
+    #panel-filtros-avanzados {
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    </style>
     <script>
         let rolSeleccionado = "";
 // Datos "ficticios" de los mentores para la búsqueda
@@ -2574,4 +2805,68 @@
     <script src="js/mentor-module.js"></script>
     <script src="js/session-module.js"></script>
     <script src="js/ui-integration.js"></script>
+    <!-- ========================================== -->
+    <!-- BLOQUEO DE CARGA AUTOMÁTICA DE MENTORES   -->
+    <!-- ========================================== -->
+    <script>
+    console.log("🔒 Protección anti-carga automática activada");
+
+    // Guardar función original
+    const cargarTutoresOriginal = window.cargarTutores;
+
+    // Sobrescribir función
+    window.cargarTutores = async function(...args) {
+        // Verificar si hay búsqueda activa
+        const inputBusqueda = document.getElementById('search-input-mentores');
+        const hayTexto = inputBusqueda && inputBusqueda.value && inputBusqueda.value.trim() !== '';
+        
+        // Verificar si hay filtros activos
+        const materia = document.getElementById('filtro-materia')?.value;
+        const universidad = document.getElementById('filtro-universidad')?.value;
+        const precio = document.getElementById('filtro-precio')?.value;
+        const rating = document.getElementById('filtro-rating')?.value;
+        
+        const hayFiltros = 
+            (materia && materia !== 'todas') ||
+            (universidad && universidad !== 'todas') ||
+            precio ||
+            rating;
+        
+        // Si NO hay búsqueda ni filtros, bloquear
+        if (!hayTexto && !hayFiltros && args.length === 0) {
+            console.log("🚫 Carga automática bloqueada - sin búsqueda activa");
+            
+            // Limpiar grid
+            const grid = document.getElementById('tutores-reales-grid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+                        <h3 style="color: #999; margin: 0 0 10px 0; font-weight: 600;">Usa la búsqueda para encontrar mentores</h3>
+                        <p style="color: #bbb; margin: 0; font-size: 14px;">Escribe una materia, nombre o usa los filtros avanzados</p>
+                    </div>
+                `;
+            }
+            
+            // Actualizar badge
+            const badge = document.getElementById('mentor-count-badge');
+            if (badge) {
+                badge.textContent = '0 Disponibles';
+                badge.style.background = '#f0f0f0';
+                badge.style.color = '#999';
+            }
+            
+            return []; // Retornar vacío
+        }
+        
+        // Si hay búsqueda/filtros, ejecutar normalmente
+        console.log("✅ Búsqueda activa - cargando mentores...");
+        return await cargarTutoresOriginal(...args);
+    };
+
+    console.log("✅ Protección instalada correctamente");
+    </script>
+
+    </body>
+    </html>
 
